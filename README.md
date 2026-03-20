@@ -10,46 +10,46 @@
 ## 🛠️ 模块一：基础架构与公共组件
 - [ ] **项目初始化**
     - [✅] 初始化 Go Module
-    - [ ] 设计项目目录结构 (cmd, internal, pkg, configs, deployments)
+    - [ ] 设计项目目录结构 (common,config,dao,model,service,util)
     - [ ] 配置管理加载 (支持 YAML/Env)
 - [ ] **数据库设计 (MySQL)**
     - [✅] 设计 `User` 表
-    - [ ] 设计 `sessions` 表 (id, user_id, title, created_at, updated_at)
+    - [ ] 设计 `Session` 表
     - [ ] 设计 `messages` 表 (id, session_id, role, content, created_at)
     - [ ] 设计 `image_logs` 表 (可选，用于记录识别历史)
-- [ ] **Redis 客户端封装**
-    - [ ] 连接池配置
-    - [ ] 封装验证码存储方法 (Key: `auth:code:{email}`, TTL: 2m)
+- [✅] **MySQL 客户端封装**
+    - [✅] 连接池配置
+- [✅] **Redis 客户端封装**
+    - [✅] 连接池配置
+    - [✅] 封装验证码存储方法
 - [ ] **RabbitMQ 客户端封装**
     - [ ] 定义消息队列结构 (Exchange, Queue, RoutingKey)
     - [ ] 实现生产者 (发送消息)
     - [ ] 实现消费者 (异步写入数据库)
 - [ ] **通用工具库**
-    - [ ] 11位随机账号生成器
+    - [✅] 11位随机账号或随机验证码生成器
     - [ ] 密码加密/验证工具 (bcrypt)
-    - [ ] 全局错误码定义
+    - [✅] 全局错误码定义
 
 ---
 
 ## 🔐 模块二：用户模块 (Auth Service)
 - [ ] **注册流程**
-    - [ ] 实现发送邮箱验证码接口 (生成验证码 -> 存Redis -> 发邮件)
+    - [✅] 实现发送邮箱验证码接口 (生成验证码 -> 存Redis -> 发邮件)
     - [ ] 实现注册接口
-        - [ ] 检验用户是否已存在（通过邮箱）
-        - [ ] 校验验证码 (读取Redis并删除)
-        - [ ] 生成11位随机账号
-        - [ ] 哈希密码并存入数据库
-        - [ ] 发送用户名到邮箱
+        - [✅] 检验用户是否已存在（通过邮箱）
+        - [✅] 校验验证码 (读取Redis并删除)
+        - [✅] 生成11位随机账号
+        - [✅] 哈希密码并存入数据库
+        - [✅] 发送用户名到邮箱
         - [ ] 生成JWT Token并返回
 - [ ] **登录流程**
     - [ ] 实现登录接口
         - [ ] 验证账号存在性
         - [ ] 比对密码哈希
-        - [ ] 生成 JWT Token (Claims: UserID, Username, Exp)
+        - [ ] 生成 JWT Token
 - [ ] **认证中间件**
     - [ ] 实现 JWT 解析逻辑
-    - [ ] 支持 `Authorization: Bearer <token>` 头解析
-    - [ ] 支持 `?token=<token>` URL 参数解析
     - [ ] 拦截未授权请求并返回标准错误响应
 - [ ] **测试**
     - [ ] 单元测试：验证码生成与校验
