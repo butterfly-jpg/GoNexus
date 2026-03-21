@@ -30,7 +30,11 @@ func Register(email, password, captcha string) (string, code.Code) {
 		return "", code.CodeServerBusy
 	}
 	// 6. 生成JWT token
-	
+	token, err := utils.GenerateToken(userInfo.ID, userInfo.Username)
+	if err != nil {
+		return "", code.CodeServerBusy
+	}
+	return token, code.CodeSuccess
 }
 
 // SendCaptcha 向指定邮箱发送验证码

@@ -38,11 +38,18 @@ var DefaultRedisKeyConfig = RedisKeyConfig{
 	CaptchaPrefix: "captcha:%s",
 }
 
+// JWTConfig JWT的配置结构体
+type JWTConfig struct {
+	Secret    string `toml:"secret"`
+	ExpireDay int    `toml:"expireDay"`
+}
+
 // Config 配置结构体
 type Config struct {
 	MysqlConfig `toml:"mysqlConfig"`
 	RedisConfig `toml:"redisConfig"`
 	EmailConfig `toml:"emailConfig"`
+	JWTConfig   `toml:"jwtConfig"`
 }
 
 var config *Config
