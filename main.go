@@ -1,20 +1,41 @@
 package main
 
 import (
+	"GoNexus/common/mysql"
+	"GoNexus/common/redis"
+	"GoNexus/config"
+	"GoNexus/router"
 	"fmt"
+	"log"
 )
 
-//TIP <p>To run your code, right-click the code and select <b>Run</b>.</p> <p>Alternatively, click
-// the <icon src="AllIcons.Actions.Execute"/> icon in the gutter and select the <b>Run</b> menu item from here.</p>
-func main() {
-	//TIP <p>Press <shortcut actionId="ShowIntentionActions"/> when your caret is at the underlined text
-	// to see how GoLand suggests fixing the warning.</p><p>Alternatively, if available, click the lightbulb to view possible fixes.</p>
-	s := "gopher"
-	fmt.Printf("Hello and welcome, %s!\n", s)
+// StartServer 开启服务
+func StartServer(addr string, port int) error {
+	// 1. 初始化路由
+	r := router.InitRouter()
+	// 2. 加载服务器静态资源路径映射关系
+	return r.Run(fmt.Sprintf("%s:%d", addr, port))
+}
 
-	for i := 1; i <= 5; i++ {
-		//TIP <p>To start your debugging session, right-click your code in the editor and select the Debug option.</p> <p>We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-		// for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.</p>
-		fmt.Println("i =", 100/i)
+func main() {
+	// 1. 获取GoNexus后端服务IP地址和端口号
+	conf := config.GetConfig()
+	host := conf.MainConfig.Host
+	port := conf.MainConfig.Port
+	// 2. 初始化MySQL
+	if err := mysql.InitMysql(); err != nil {
+		log.Println("init mysql failed. err:", err)
+		return
+	}
+	log.Println("init mysql success")
+	// 3. 初始化Redis
+	redis.InitRedis()
+	log.Println("init redis success")
+	// 4. 初始化RabbitMQ
+	// todo
+	// 5. 注册并启动HTTP服务
+	if err := StartServer(host, port); err != nil {
+		log.Println("start server failed. err:", err)
+		return
 	}
 }

@@ -50,46 +50,36 @@ func GenerateToken(userID int64, username string) (string, error) {
 	if expireDay <= 0 {
 		expireDay = 7
 	}
-
 	claims := Claims{
 		UserID:   userID,
 		Username: username,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().AddDate(0, 0, expireDay)),
+			Issuer:    cfg.JWTConfig.Issuer,
+			Subject:   cfg.JWTConfig.Subject,
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
-			Issuer:    "GoNexus",
 		},
 	}
-
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenStr, err := token.SignedString([]byte(secret))
-	if err != nil {
-		return "", err
-	}
-	return tokenStr, nil
+	return token.SignedString([]byte(secret))
 }
 
 // ParseToken 解析JWT token
-func ParseToken(tokenStr string) (*Claims, error) {
+func ParseToken(tokenStr string) (string, error) {
 	cfg := config.GetConfig()
 	secret := cfg.JWTConfig.Secret
 	if secret == "" {
 		secret = "gonexus_default_secret"
 	}
-
 	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, errors.New("unexpected signing method")
-		}
 		return []byte(secret), nil
 	})
 	if err != nil {
-		return nil, err
+		return "", err
 	}
-
 	claims, ok := token.Claims.(*Claims)
 	if !ok || !token.Valid {
-		return nil, errors.New("invalid token")
+		return "", errors.New("invalid token")
 	}
-	return claims, nil
+	return claims.Username, nil
 }

@@ -15,7 +15,7 @@ const (
 	EmailCondition    string = "email"
 )
 
-// IsExistUser 判断用户是否已存在
+// IsExistUser 判断用户是否已存在,存在返回true，不存在返回false
 func IsExistUser(value, condition string) (bool, *model.User) {
 	var user *model.User
 	var err error
@@ -39,8 +39,8 @@ func Register(username, password, email string) (*model.User, error) {
 	if user, err := mysql.InsertUser(&model.User{
 		Username: username,
 		Password: utils.MD5(password),
-		Email:    email},
-	); err != nil {
+		Email:    email,
+	}); err != nil {
 		log.Fatalf("Insert user failed: %v", err)
 		return nil, err
 	} else {

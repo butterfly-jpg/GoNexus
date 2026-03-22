@@ -24,6 +24,15 @@ type RedisConfig struct {
 	RedisPass string `toml:"password"`
 }
 
+// RabbitmqConfig RabbitMQ的配置结构体
+type RabbitmqConfig struct {
+	RabbitmqHost     string `toml:"host"`
+	RabbitmqPort     int    `toml:"port"`
+	RabbitmqUsername string `toml:"username"`
+	RabbitmqPassword string `toml:"password"`
+	RabbitmqVhost    string `toml:"vhost"`
+}
+
 // EmailConfig 邮箱的配置结构体
 type EmailConfig struct {
 	Authcode string `toml:"authcode"`
@@ -42,14 +51,25 @@ var DefaultRedisKeyConfig = RedisKeyConfig{
 type JWTConfig struct {
 	Secret    string `toml:"secret"`
 	ExpireDay int    `toml:"expireDay"`
+	Issuer    string `toml:"issuer"`
+	Subject   string `toml:"subject"`
+}
+
+// MainConfig 后端服务配置信息
+type MainConfig struct {
+	AppName string `toml:"appName"`
+	Port    int    `toml:"port"`
+	Host    string `toml:"host"`
 }
 
 // Config 配置结构体
 type Config struct {
-	MysqlConfig `toml:"mysqlConfig"`
-	RedisConfig `toml:"redisConfig"`
-	EmailConfig `toml:"emailConfig"`
-	JWTConfig   `toml:"jwtConfig"`
+	MainConfig     `toml:"mainConfig"`
+	MysqlConfig    `toml:"mysqlConfig"`
+	RedisConfig    `toml:"redisConfig"`
+	RabbitmqConfig `toml:"rabbitmqConfig"`
+	EmailConfig    `toml:"emailConfig"`
+	JWTConfig      `toml:"jwtConfig"`
 }
 
 var config *Config
