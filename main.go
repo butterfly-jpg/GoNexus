@@ -2,6 +2,7 @@ package main
 
 import (
 	"GoNexus/common/mysql"
+	"GoNexus/common/rabbitmq"
 	"GoNexus/common/redis"
 	"GoNexus/config"
 	"GoNexus/router"
@@ -24,15 +25,16 @@ func main() {
 	port := conf.MainConfig.Port
 	// 2. 初始化MySQL
 	if err := mysql.InitMysql(); err != nil {
-		log.Println("init mysql failed. err:", err)
+		log.Println("init MySQL failed. err:", err)
 		return
 	}
-	log.Println("init mysql success")
+	log.Println("init MySQL success")
 	// 3. 初始化Redis
 	redis.InitRedis()
-	log.Println("init redis success")
+	log.Println("init Redis success")
 	// 4. 初始化RabbitMQ
-	// todo
+	rabbitmq.InitRabbitMQ()
+	log.Println("init RabbitMQ success")
 	// 5. 注册并启动HTTP服务
 	if err := StartServer(host, port); err != nil {
 		log.Println("start server failed. err:", err)
