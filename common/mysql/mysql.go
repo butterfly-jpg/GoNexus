@@ -56,6 +56,8 @@ func InitMysql() error {
 func migration() error {
 	return DB.AutoMigrate(
 		&model.User{},
+		&model.Message{},
+		&model.Session{},
 	)
 }
 
