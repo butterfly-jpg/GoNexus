@@ -8,9 +8,9 @@
 ---
 
 ## 🛠️ 模块一：基础架构与公共组件
-- [ ] **项目初始化**
+- [✅] **项目初始化**
     - [✅] 初始化 Go Module
-    - [ ] 设计项目目录结构 (common,config,dao,model,service,util,middleware,controller,router)
+    - [✅] 设计项目目录结构 (common,config,dao,model,service,util,middleware,controller,router)
     - [✅] 配置管理加载 (.toml)
 - [ ] **数据库设计 (MySQL)**
     - [✅] 设计 `User` 表，存储用户注册登录信息
@@ -22,10 +22,10 @@
 - [✅] **Redis 客户端封装**
     - [✅] 连接池配置
     - [✅] 封装验证码存储方法
-- [ ] **RabbitMQ 客户端封装**
-    - [ ] 定义消息队列结构 (Exchange, Queue, RoutingKey)
-    - [ ] 实现生产者 (发送消息)
-    - [ ] 实现消费者 (异步写入数据库)
+- [✅] **RabbitMQ 客户端封装**
+    - [✅] 定义消息队列结构 (Exchange, Queue, RoutingKey)
+    - [✅] 实现生产者 (发送消息)
+    - [✅] 实现消费者 (异步写入数据库)
 - [✅] **通用工具库**
     - [✅] 11位随机账号或随机验证码生成器
     - [✅] 密码加密/token生成
@@ -61,15 +61,28 @@
 
 ## 💬 模块三：AI 聊天对话系统 (Chat Service)
 - [ ] **会话管理 (Session Management)**
-    - [ ] 实现创建新会话接口
+    - [✅] 实现创建新会话接口
     - [ ] 实现获取用户会话列表接口
     - [ ] 实现获取特定会话历史记录接口
     - [ ] 上下文管理器实现 (根据 SessionID 加载/维护上下文)
 - [ ] **AI助手架构层**
-  - [✅] 定义封装用户单个会话的AI交互结构体,支持多用户会话隔离,有效管理用户-会话-AIHelper的映射关系（封装的功能包括：AI模型接口、历史消息列表、读写锁、会话唯一标识、消息存储回调函数）
-  - [✅] 定义AI模型接口,基于工厂模式可支持多种AI模型实现,根据不同模型实现对应的同步/流式两种生成回复方法和返回模型类型方法（目前只支持deepseek和qwen）
-  - [✅] 实现创建 AIHelper 实例方法并基于单例模式确保实例唯一性
-  - [ ] 实现移除和查询 AIHelper 实例方法
+    - [✅] 定义封装用户单个会话的AI交互结构体,支持多用户会话隔离,有效管理用户-会话-AIHelper的映射关系（封装的功能包括：AI模型接口、历史消息列表、读写锁、会话唯一标识、消息存储回调函数）
+    - [✅] 定义AI模型接口,基于工厂模式可支持多种AI模型实现,根据不同模型实现对应的同步/流式两种生成回复方法和返回模型类型方法（目前只支持deepseek和qwen）
+    - [✅] 实现创建 AIHelper 实例方法并基于单例模式确保实例唯一性
+    - [ ] 实现移除和查询 AIHelper 实例方法
+- [ ] **AIHelper架构层**
+    - [✅] **AI模型工厂**
+        - [✅] 设计存储 模型-创建函数 的数据结构AIModelFactory，根据模型类型获取对应的模型创建方法
+        - [✅] 实现CreateAIModel方法
+        - [✅] 实现CreateAIHelper方法，根据类型创建AIHelper实例
+        - [✅] 实现RegisterModel方法，允许运行时注册新模型类型，动态扩展支持的AI服务
+    - [ ] **AIHelper管理器** 
+        - [✅] 设计存储 用户-会话-AIHelper 映射关系的数据结构AIHelperManager，以支持多用户会话隔离
+        - [✅] 实现GetOrCreateAIHelper方法，获取/创建AIHelper实例
+        - [ ] 实现RemoveAIHelper方法，移除指定AIHelper实例
+        - [ ] 实现GetAIHelper方法，获取现存指定AIHelper实例
+        - [ ] 实现GetUserSession方法，获取用户所有的会话ID列表
+        - [✅] 实现GetGlobalManager方法，基于单例模式返回AIHelper单例实例，提供AIHelper的全局统一管理入口
 - [ ] **同步对话接口**
     - [ ] 接收用户消息
     - [ ] 调用 AI 模型获取完整回复
