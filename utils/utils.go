@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"GoNexus/model"
 	"crypto/md5"
 	"encoding/hex"
 	"errors"
@@ -10,6 +11,7 @@ import (
 
 	"GoNexus/config"
 
+	"github.com/cloudwego/eino/schema"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -82,4 +84,29 @@ func ParseToken(tokenStr string) (string, error) {
 		return "", errors.New("invalid token")
 	}
 	return claims.Username, nil
+}
+
+// ConvertToSchemaMessages 将model.Message转换为schema.Message格式
+func ConvertToSchemaMessages(msgs []*model.Message) []*schema.Message {
+	schemaMsgs := make([]*schema.Message, 0, len(msgs))
+	for _, msg := range msgs {
+		role := schema.Assistant
+		if msg.IsUser {
+			role = schema.User
+		}
+		schemaMsgs = append(schemaMsgs, &schema.Message{
+			Role:    role,
+			Content: msg.Content,
+		})
+	}
+	return schemaMsgs
+}
+
+// ConvertToModelMessages 将schema.Message转换为model.Message格式
+func ConvertToModelMessages(sessionID, username, content string) *model.Message {
+	return &model.Message{
+		SessionID: sessionID,
+		Username:  username,
+		Content:   content,
+	}
 }

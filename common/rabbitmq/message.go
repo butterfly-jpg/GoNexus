@@ -24,7 +24,7 @@ func MQMessage(msg *amqp.Delivery) error {
 	}
 	newMsg := &model.Message{
 		SessionID: param.SessionID,
-		UserName:  param.Username,
+		Username:  param.Username,
 		Content:   param.Content,
 		IsUser:    param.IsUser,
 	}
