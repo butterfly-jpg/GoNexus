@@ -12,6 +12,7 @@ type ModelCreator func(ctx context.Context, config map[string]interface{}) (AIMo
 // AIModelFactory AI模型工厂
 type AIModelFactory struct {
 	creators map[string]ModelCreator
+	mu       sync.RWMutex
 }
 
 var (
@@ -24,6 +25,7 @@ func GetGlobalFactory() *AIModelFactory {
 	factoryOnce.Do(func() {
 		globalFactory = &AIModelFactory{
 			creators: make(map[string]ModelCreator),
+			mu:       sync.RWMutex{},
 		}
 		// 注册AI模型提升扩展能力
 		globalFactory.registerCreators()
@@ -54,7 +56,9 @@ func (f *AIModelFactory) CreateAIHelper(ctx context.Context, modelType, sessionI
 
 // CreateAIModel 根据类型创建AI模型
 func (f *AIModelFactory) CreateAIModel(ctx context.Context, modelType string, config map[string]interface{}) (AIModel, error) {
+	f.mu.RLock()
 	modelCreator, exists := f.creators[modelType]
+	f.mu.RUnlock()
 	if !exists {
 		return nil, fmt.Errorf("unsupported model type %s", modelType)
 	}
@@ -63,5 +67,7 @@ func (f *AIModelFactory) CreateAIModel(ctx context.Context, modelType string, co
 
 // RegisterModel 可扩展注册
 func (f *AIModelFactory) RegisterModel(modelType string, creator ModelCreator) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
 	f.creators[modelType] = creator
 }

@@ -10,7 +10,7 @@
 ## 🛠️ 模块一：基础架构与公共组件
 - [✅] **项目初始化**
     - [✅] 初始化 Go Module
-    - [✅] 设计项目目录结构 (common,config,dao,model,service,util,middleware,controller,router)
+    - [✅] 设计项目目录结构 (common,config,dao,model,service,util,middleware,controller,router,doc)
     - [✅] 配置管理加载 (.toml)
 - [✅] **数据库设计 (MySQL)**
     - [✅] 设计 `User` 表，存储用户注册登录信息

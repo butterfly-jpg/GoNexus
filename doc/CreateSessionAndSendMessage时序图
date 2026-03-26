@@ -1,0 +1,116 @@
+# CreateSessionAndSendMessage 时序图
+
+## 调用链路
+
+```
+Client          Controller          Service           DAO/DB        AIHelperManager    AIModelFactory    AIHelper          AIModel(DeepSeek)    RabbitMQ
+  │                  │                  │                │                 │                  │               │                    │                 │
+  │  POST /chat/     │                  │                │                 │                  │               │                    │                 │
+  │  send-new-session│                  │                │                 │                  │               │                    │                 │
+  │─────────────────>│                  │                │                 │                  │               │                    │                 │
+  │                  │ JWT Auth 验证     │                │                 │                  │               │                    │                 │
+  │                  │ 解析 username     │                │                 │                  │               │                    │                 │
+  │                  │                  │                │                 │                  │               │                    │                 │
+  │                  │ CreateSessionAnd │                │                 │                  │               │                    │                 │
+  │                  │ SendMessage()    │                │                 │                  │               │                    │                 │
+  │                  │─────────────────>│                │                 │                  │               │                    │                 │
+  │                  │                  │                │                 │                  │               │                    │                 │
+  │                  │                  │ ① 生成 uuid    │                 │                  │               │                    │                 │
+  │                  │                  │ 构造 Session   │                 │                  │               │                    │                 │
+  │                  │                  │                │                 │                  │               │                    │                 │
+  │                  │                  │ CreateSession()│                 │                  │               │                    │                 │
+  │                  │                  │───────────────>│                 │                  │               │                    │                 │
+  │                  │                  │                │ INSERT sessions │                  │               │                    │                 │
+  │                  │                  │                │────────────────>(MySQL)             │               │                    │                 │
+  │                  │                  │                │<────────────────│                  │               │                    │                 │
+  │                  │                  │<───────────────│                 │                  │               │                    │                 │
+  │                  │                  │                │                 │                  │               │                    │                 │
+  │                  │                  │ ② GetGlobal    │                 │                  │               │                    │                 │
+  │                  │                  │ Manager()      │                 │                  │               │                    │                 │
+  │                  │                  │ (单例)          │                 │                  │               │                    │                 │
+  │                  │                  │────────────────────────────────>│                  │               │                    │                 │
+  │                  │                  │                │                 │                  │               │                    │                 │
+  │                  │                  │ GetOrCreate    │                 │                  │               │                    │                 │
+  │                  │                  │ AIHelper()     │                 │                  │               │                    │                 │
+  │                  │                  │────────────────────────────────>│                  │               │                    │                 │
+  │                  │                  │                │                 │ helpers[user]    │               │                    │                 │
+  │                  │                  │                │                 │ [sessionID]      │               │                    │                 │
+  │                  │                  │                │                 │ 不存在            │               │                    │                 │
+  │                  │                  │                │                 │                  │               │                    │                 │
+  │                  │                  │                │                 │ GetGlobalFactory()              │                    │                 │
+  │                  │                  │                │                 │ (单例)            │               │                    │                 │
+  │                  │                  │                │                 │─────────────────>│               │                    │                 │
+  │                  │                  │                │                 │                  │               │                    │                 │
+  │                  │                  │                │                 │ CreateAIHelper() │               │                    │                 │
+  │                  │                  │                │                 │ modelType="1"    │               │                    │                 │
+  │                  │                  │                │                 │─────────────────>│               │                    │                 │
+  │                  │                  │                │                 │                  │ NewDeepSeek   │                    │                 │
+  │                  │                  │                │                 │                  │ Model()       │                    │                 │
+  │                  │                  │                │                 │                  │ (读环境变量)   │                    │                 │
+  │                  │                  │                │                 │                  │──────────────>(AIModel实例)         │                 │
+  │                  │                  │                │                 │                  │ NewAIHelper() │                    │                 │
+  │                  │                  │                │                 │                  │──────────────>│                    │                 │
+  │                  │                  │                │                 │<─────────────────│               │                    │                 │
+  │                  │                  │                │                 │ 存入 helpers map  │               │                    │                 │
+  │                  │                  │<───────────────────────────────│                  │               │                    │                 │
+  │                  │                  │                │                 │                  │               │                    │                 │
+  │                  │                  │ ③ GenerateResponse()           │                  │               │                    │                 │
+  │                  │                  │──────────────────────────────────────────────────>│               │                    │                 │
+  │                  │                  │                │                 │                  │               │                    │                 │
+  │                  │                  │                │                 │                  │               │ AddMessage(user,   │                 │
+  │                  │                  │                │                 │                  │               │ isUser=true,       │                 │
+  │                  │                  │                │                 │                  │               │ save=true)         │                 │
+  │                  │                  │                │                 │                  │               │ 存入内存 messages   │                 │
+  │                  │                  │                │                 │                  │               │ Publish到MQ ───────────────────────>│
+  │                  │                  │                │                 │                  │               │                    │                 │
+  │                  │                  │                │                 │                  │               │ ConvertToSchema    │                 │
+  │                  │                  │                │                 │                  │               │ Messages()         │                 │
+  │                  │                  │                │                 │                  │               │                    │                 │
+  │                  │                  │                │                 │                  │               │ model.GenerateResponse()            │
+  │                  │                  │                │                 │                  │               │───────────────────>│                 │
+  │                  │                  │                │                 │                  │               │                    │ 调用 DeepSeek API│
+  │                  │                  │                │                 │                  │               │                    │────────────────>(外部API)
+  │                  │                  │                │                 │                  │               │                    │<────────────────│
+  │                  │                  │                │                 │                  │               │<───────────────────│ schemaMsg        │
+  │                  │                  │                │                 │                  │               │                    │                 │
+  │                  │                  │                │                 │                  │               │ ConvertToModel     │                 │
+  │                  │                  │                │                 │                  │               │ Messages()         │                 │
+  │                  │                  │                │                 │                  │               │                    │                 │
+  │                  │                  │                │                 │                  │               │ AddMessage(AI,     │                 │
+  │                  │                  │                │                 │                  │               │ isUser=false,      │                 │
+  │                  │                  │                │                 │                  │               │ save=true)         │                 │
+  │                  │                  │                │                 │                  │               │ 存入内存 messages   │                 │
+  │                  │                  │                │                 │                  │               │ Publish到MQ ───────────────────────>│
+  │                  │                  │                │                 │                  │               │                    │                 │
+  │                  │                  │<──────────────────────────────────────────────────│ modelMsg       │                 │
+  │                  │                  │                │                 │                  │               │                    │                 │
+  │                  │ return           │                │                 │                  │               │                    │                 │
+  │                  │ sessionID+content│                │                 │                  │               │                    │                 │
+  │<─────────────────│                  │                │                 │                  │               │                    │                 │
+```
+
+---
+
+## 关键流程总结
+
+**3 个主要阶段：**
+
+### 阶段一：创建会话
+- 生成 UUID 作为 SessionID
+- 以用户第一次提问作为会话标题
+- 写入 MySQL `sessions` 表
+
+### 阶段二：获取 AIHelper
+通过双层单例（`Manager` + `Factory`）查找或创建 `AIHelper`：
+- `map[username][sessionID]` 命中则直接复用（携带历史消息上下文）
+- 未命中则通过 `Factory` 按 `modelType` 创建对应模型实例
+  - `"1"` → DeepSeek（读取 `DEEPSEEK_API_KEY` 等环境变量）
+  - `"2"` → Qwen（读取 `QWEN_API_KEY` 等环境变量）
+
+### 阶段三：生成 AI 回复
+`AIHelper.GenerateResponse` 执行以下步骤：
+1. 用户消息追加到内存 `messages`，**异步发布到 RabbitMQ**
+2. 将完整对话历史（`[]*model.Message`）转换为 `[]*schema.Message`
+3. 调用 DeepSeek / Qwen 外部 API 获取回复
+4. AI 回复追加到内存 `messages`，**异步发布到 RabbitMQ**
+5. 返回 `sessionID` + AI 回复内容给客户端
