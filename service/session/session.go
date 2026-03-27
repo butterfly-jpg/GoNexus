@@ -27,7 +27,6 @@ func CreateSessionAndSendMessage(username, userQuestion, modelType string) (stri
 	// 2. 创建 AIHelper 实例
 	globalManager := aihelper.GetGlobalManager()
 	config := map[string]interface{}{
-		"apiKey":   "api-key", // todo
 		"username": username,
 	}
 	helper, err := globalManager.GetOrCreateAIHelper(username, createdSession.ID, modelType, config)
@@ -42,4 +41,25 @@ func CreateSessionAndSendMessage(username, userQuestion, modelType string) (stri
 		return "", "", code.AIModelFail
 	}
 	return aiResponse.SessionID, aiResponse.Content, code.SuccessCode
+}
+
+// ChatSend 基于当前会话窗口与AI同步聊天
+func ChatSend(username, sessionID, userQuestion, modelType string) (string, code.Code) {
+	// 1. 获取AIHelper实例
+	globalManager := aihelper.GetGlobalManager()
+	config := map[string]interface{}{
+		"username": username,
+	}
+	helper, err := globalManager.GetOrCreateAIHelper(username, sessionID, modelType, config)
+	if err != nil {
+		log.Println("ChatSend GetOrCreateAIHelper failed. err:", err)
+		return "", code.ServerBusyCode
+	}
+	// 2. 生成AI回复,同步对话
+	aiResponse, err := helper.GenerateResponse(context.Background(), username, userQuestion)
+	if err != nil {
+		log.Println("ChatSend GenerateResponse failed. err:", err)
+		return "", code.AIModelFail
+	}
+	return aiResponse.Content, code.SuccessCode
 }

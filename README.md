@@ -60,7 +60,10 @@
 
 ## 💬 模块三：AI 聊天对话系统 (Chat Service)
 - [ ] **会话管理 (Session Management)**
-    - [✅] 实现创建新会话接口
+    - [✅] 实现通过发送问题获取AI同步回复来创建新会话CreateSessionAndSendMessage方法
+    - [ ] 实现通过发送问题获取AI流式回复来创建新会话CrateStreamSessionAndSendMessage方法
+    - [✅] 实现基于当前会话窗口与AI同步聊天ChatSend方法
+    - [ ] 实现基于当前会话窗口与AI流式聊天ChatStreamSend方法
     - [ ] 实现获取用户会话列表接口
     - [ ] 实现获取特定会话历史记录接口
     - [ ] 上下文管理器实现 (根据 SessionID 加载/维护上下文)
@@ -83,10 +86,10 @@
     - [✅] 构造异步消息发送至 RabbitMQ (存储历史)
     - [✅] 返回完整 JSON 响应
 - [ ] **流式对话接口 (SSE)**
-    - [ ] 设置 Response Header (`Content-Type: text/event-stream`)
-    - [ ] 建立 SSE 连接
+    - [ ] SSE配置（Content-Type、Cache-Control、Connection、Access-Control-Allow-Origin、X-Accel-Buffering）
+    - [ ] 建立SSE连接
     - [ ] 实时接收 AI 模型流式片段并推送给前端
-    - [ ] 发送结束标记 `[DONE]`
+    - [ ] 发送结束标记 "data: [DONE]\n\n"
     - [ ] 异步将完整消息发送至 RabbitMQ (需处理流式拼接或回调存储)
 - [ ] **异步存储消费者**
     - [✅] 监听消息队列
