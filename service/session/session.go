@@ -7,6 +7,7 @@ import (
 	"GoNexus/model"
 	"context"
 	"log"
+	"net/http"
 
 	"github.com/google/uuid"
 )
@@ -32,7 +33,7 @@ func CreateSessionAndSendMessage(username, userQuestion, modelType string) (stri
 	helper, err := globalManager.GetOrCreateAIHelper(username, createdSession.ID, modelType, config)
 	if err != nil {
 		log.Println("CreateSessionAndSendMessage GetOrCreateAIHelper failed. err:", err)
-		return "", "", code.ServerBusyCode
+		return "", "", code.AIModelFail
 	}
 	// 3. 生成AI回复,同步对话
 	aiResponse, err := helper.GenerateResponse(context.Background(), username, userQuestion)
@@ -53,7 +54,7 @@ func ChatSend(username, sessionID, userQuestion, modelType string) (string, code
 	helper, err := globalManager.GetOrCreateAIHelper(username, sessionID, modelType, config)
 	if err != nil {
 		log.Println("ChatSend GetOrCreateAIHelper failed. err:", err)
-		return "", code.ServerBusyCode
+		return "", code.AIModelFail
 	}
 	// 2. 生成AI回复,同步对话
 	aiResponse, err := helper.GenerateResponse(context.Background(), username, userQuestion)
@@ -62,4 +63,64 @@ func ChatSend(username, sessionID, userQuestion, modelType string) (string, code
 		return "", code.AIModelFail
 	}
 	return aiResponse.Content, code.SuccessCode
+}
+
+// CreateStreamSessionOnly 只创建流式会话
+func CreateStreamSessionOnly(username, userQuestion string) (string, code.Code) {
+	newSession := &model.Session{
+		ID:       uuid.NewString(),
+		Username: username,
+		Title:    userQuestion,
+	}
+	createdSession, err := session.CreateSession(newSession)
+	if err != nil {
+		log.Println("CreateStreamSessionOnly CreateSession failed. err:", err)
+		return "", code.ServerBusyCode
+	}
+	return createdSession.ID, code.SuccessCode
+}
+
+// StreamMessageToCurrentSession 以流式方式在当前会话中进行传输信息
+func StreamMessageToCurrentSession(username, sessionID, userQuestion, modelType string, writer http.ResponseWriter) code.Code {
+	// 1. 确保writer支持Flush
+	flusher, ok := writer.(http.Flusher)
+	if !ok {
+		log.Println("StreamMessageToCurrentSession: streaming unsupported")
+		return code.ServerBusyCode
+	}
+	// 2. 获取AIHelper实例
+	globalManager := aihelper.GetGlobalManager()
+	config := map[string]interface{}{
+		"username": username,
+	}
+	helper, err := globalManager.GetOrCreateAIHelper(username, sessionID, modelType, config)
+	if err != nil {
+		log.Println("StreamMessageToCurrentSession GetOrCreateAIHelper failed. err:", err)
+		return code.AIModelFail
+	}
+	// 3. 定义回调方法
+	cb := func(msg string) {
+		log.Printf("[SSE] Sending chunk: %s (len=%d)\n", msg, len(msg))
+		_, err = writer.Write([]byte("data: " + msg + "\n\n"))
+		if err != nil {
+			log.Println("[SSE] Write error:", err)
+			return
+		}
+		flusher.Flush()
+		log.Println("[SSE] Flushed")
+	}
+	// 4. 调用AI对话
+	_, err = helper.StreamResponse(context.Background(), username, userQuestion, cb)
+	if err != nil {
+		log.Println("StreamMessageToCurrentSession StreamResponse failed. err:", err)
+		return code.AIModelFail
+	}
+	// 5. 传回前端完成标记
+	_, err = writer.Write([]byte("data: [DONE]\n\n"))
+	if err != nil {
+		log.Println("[SSE] Write DONE error:", err)
+		return code.AIModelFail
+	}
+	flusher.Flush()
+	return code.SuccessCode
 }

@@ -72,3 +72,23 @@ func (h *AIHelper) GenerateResponse(ctx context.Context, username, userQuestion 
 	h.AddMessage(modelMsg.Content, username, false, true)
 	return modelMsg, nil
 }
+
+// StreamResponse 流式生成消息
+func (h *AIHelper) StreamResponse(ctx context.Context, username, userQuestion string, cb StreamCallback) (*model.Message, error) {
+	// 1. 存储用户消息model.Message
+	h.AddMessage(userQuestion, username, true, true)
+	// 2. 将model.Message转为schema.Message
+	h.mu.RLock()
+	messages := utils.ConvertToSchemaMessages(h.messages)
+	h.mu.RUnlock()
+	// 3. 调用大模型获取AI回复的流式消息schema.Message
+	content, err := h.model.StreamResponse(ctx, messages, cb)
+	if err != nil {
+		return nil, err
+	}
+	// 4. 将schema.Message转为model.Message
+	modelMsg := utils.ConvertToModelMessages(h.sessionID, username, content)
+	// 5. 存储AI消息schema.Message
+	h.AddMessage(modelMsg.Content, username, false, true)
+	return modelMsg, nil
+}
