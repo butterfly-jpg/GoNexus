@@ -78,6 +78,15 @@ func ChatSend(c *gin.Context) {
 	c.JSON(http.StatusOK, res)
 }
 
+// setSSEHeaders 设置 SSE 响应头
+func setSSEHeaders(c *gin.Context) {
+	c.Header("Content-Type", "text/event-stream")
+	c.Header("Cache-Control", "no-cache")
+	c.Header("Connection", "keep-alive")
+	c.Header("Access-Control-Allow-Origin", "*")
+	c.Header("X-Accel-Buffering", "no")
+}
+
 // CrateStreamSessionAndSendMessage 控制层创建会话和发送SSE消息回复方法
 func CrateStreamSessionAndSendMessage(c *gin.Context) {
 	// 1. 参数处理
@@ -88,11 +97,7 @@ func CrateStreamSessionAndSendMessage(c *gin.Context) {
 		return
 	}
 	// 2. 设置SSE头
-	c.Header("Content-Type", "text/event-stream")
-	c.Header("Cache-Control", "no-cache")
-	c.Header("Connection", "keep-alive")
-	c.Header("Access-Control-Allow-Origin", "*")
-	c.Header("X-Accel-Buffering", "no")
+	setSSEHeaders(c)
 	// 3. 先创建会话并获取sessionID
 	sessionID, resCode := session.CreateStreamSessionOnly(username, req.UserQuestion)
 	if resCode != code.SuccessCode {
@@ -106,6 +111,25 @@ func CrateStreamSessionAndSendMessage(c *gin.Context) {
 	resCode = session.StreamMessageToCurrentSession(username, sessionID, req.UserQuestion, req.ModelType, http.ResponseWriter(c.Writer))
 	if resCode != code.SuccessCode {
 		c.SSEvent("error", gin.H{"message": "send message failed"})
+		return
+	}
+}
+
+// ChatStreamSend 基于当前会话窗口与AI流式聊天
+func ChatStreamSend(c *gin.Context) {
+	// 1. 参数处理
+	req := &ChatSendRequest{}
+	username := c.GetString("username")
+	if err := c.ShouldBindJSON(req); err != nil {
+		c.JSON(http.StatusOK, gin.H{"error": "Invalid parameters"})
+		return
+	}
+	// 2. 设置SSE头
+	setSSEHeaders(c)
+	// 3. 发送消息,将AI消息流式回复
+	resCode := session.ChatStreamSend(username, req.SessionID, req.UserQuestion, req.ModelType, http.ResponseWriter(c.Writer))
+	if resCode != code.SuccessCode {
+		c.JSON(http.StatusOK, gin.H{"message": "send message failed"})
 		return
 	}
 }

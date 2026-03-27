@@ -63,7 +63,7 @@
     - [✅] 实现通过发送问题获取AI同步回复来创建新会话CreateSessionAndSendMessage方法
     - [✅] 实现通过发送问题获取AI流式回复来创建新会话CrateStreamSessionAndSendMessage方法
     - [✅] 实现基于当前会话窗口与AI同步聊天ChatSend方法
-    - [ ] 实现基于当前会话窗口与AI流式聊天ChatStreamSend方法
+    - [✅] 实现基于当前会话窗口与AI流式聊天ChatStreamSend方法
     - [ ] 实现获取用户会话列表接口
     - [ ] 实现获取特定会话历史记录接口
     - [ ] 上下文管理器实现 (根据 SessionID 加载/维护上下文)

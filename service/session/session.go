@@ -124,3 +124,8 @@ func StreamMessageToCurrentSession(username, sessionID, userQuestion, modelType 
 	flusher.Flush()
 	return code.SuccessCode
 }
+
+// ChatStreamSend 基于当前会话窗口与AI流式聊天
+func ChatStreamSend(username, sessionID, userQuestion, modelType string, writer http.ResponseWriter) code.Code {
+	return StreamMessageToCurrentSession(username, sessionID, userQuestion, modelType, writer)
+}

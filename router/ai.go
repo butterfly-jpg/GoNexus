@@ -14,4 +14,5 @@ func RegisterAIRouter(r *gin.RouterGroup) {
 
 	// 流式聊天接口
 	r.POST("/chat/send-stream-new-session", session.CrateStreamSessionAndSendMessage)
+	r.POST("/chat/send-stream", session.ChatStreamSend)
 }
