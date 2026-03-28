@@ -59,26 +59,25 @@
 ---
 
 ## 💬 模块三：AI 聊天对话系统 (Chat Service)
-- [ ] **会话管理 (Session Management)**
-    - [✅] 实现通过发送问题获取AI同步回复来创建新会话CreateSessionAndSendMessage方法
-    - [✅] 实现通过发送问题获取AI流式回复来创建新会话CrateStreamSessionAndSendMessage方法
-    - [✅] 实现基于当前会话窗口与AI同步聊天ChatSend方法
-    - [✅] 实现基于当前会话窗口与AI流式聊天ChatStreamSend方法
-    - [ ] 实现获取用户会话列表接口
-    - [ ] 实现获取特定会话历史记录接口
-    - [ ] 上下文管理器实现 (根据 SessionID 加载/维护上下文)
-- [ ] **AI架构层**
+- [✅] **会话管理 (Controller层接口)**
+    - [✅] 实现通过发送问题获取AI同步回复来创建新会话接口 CreateSessionAndSendMessage
+    - [✅] 实现通过发送问题获取AI流式回复来创建新会话接口 CrateStreamSessionAndSendMessage
+    - [✅] 实现基于当前会话窗口与AI同步聊天接口 ChatSend
+    - [✅] 实现基于当前会话窗口与AI流式聊天接口 ChatStreamSend
+    - [✅] 实现获取用户会话列表接口 GetUserSessionByUsername
+    - [✅] 实现获取特定会话历史记录接口 ChatHistory
+- [✅] **AI架构层**
     - [✅] **AI模型工厂**
         - [✅] 设计存储 模型-创建函数 的数据结构AIModelFactory，根据模型类型获取对应的模型创建方法
         - [✅] 实现CreateAIModel方法
         - [✅] 实现CreateAIHelper方法，根据类型创建AIHelper实例
         - [✅] 实现RegisterModel方法，允许运行时注册新模型类型，动态扩展支持的AI服务
-    - [ ] **AIHelper管理器** 
+    - [✅] **AIHelper管理器** 
         - [✅] 设计存储 用户-会话-AIHelper 映射关系的数据结构AIHelperManager，以支持多用户会话隔离
         - [✅] 实现GetOrCreateAIHelper方法，获取/创建AIHelper实例
-        - [ ] 实现RemoveAIHelper方法，移除指定AIHelper实例
-        - [ ] 实现GetAIHelper方法，获取现存指定AIHelper实例
-        - [ ] 实现GetUserSession方法，获取用户所有的会话ID列表
+        ~~- [ ] 实现RemoveAIHelper方法，移除指定AIHelper实例~~
+        - [✅] 实现GetAIHelper方法，获取现存指定AIHelper实例
+        - [✅] 实现GetUserSession方法，获取用户所有的会话ID列表
         - [✅] 实现GetGlobalManager方法，基于单例模式返回AIHelper单例实例，提供AIHelper的全局统一管理入口
 - [✅] **同步对话接口**
     - [✅] 接收用户消息
@@ -94,9 +93,9 @@
     - [✅] 监听消息队列
     - [✅] 解析消息并批量/单条写入（只实现了单条写入）
     ~~- [ ] 错误重试机制~~
-- [ ] **测试**
-    - [ ] 测试多会话隔离性
-    - [ ] 测试流式输出在浏览器的表现
+- [✅] **测试**
+    - [✅] 测试多会话隔离性
+    - [✅] 测试流式输出在浏览器的表现
 
 ---
 
@@ -138,7 +137,9 @@
 - [ ] **文档**
     - [ ] 编写 API 接口文档 (Swagger/Readme)
     - [ ] 编写部署指南
-
+- [ ] **功能优化**
+    - [ ] 用户创建新会话后,使用用户提的第一个问题为会话title
+    - [ ] LLM 模型参数采用配置化，与业务逻辑解耦
 ---
 
 ## 📅 优先级建议

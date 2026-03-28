@@ -57,3 +57,31 @@ func (m *AIHelperManager) GetOrCreateAIHelper(username, sessionID, modelType str
 	sessionHelper[sessionID] = helper
 	return helper, nil
 }
+
+// GetUserSessions 获取指定用户的所有会话ID
+func (m *AIHelperManager) GetUserSessions(username string) []string {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	userHelpers, ok := m.helpers[username]
+	if !ok {
+		return []string{}
+	}
+	sessionIDs := make([]string, len(userHelpers))
+	// key就是会话ID
+	for sessionID := range userHelpers {
+		sessionIDs = append(sessionIDs, sessionID)
+	}
+	return sessionIDs
+}
+
+// GetAIHelper 获取指定用户指定会话的AIHelper
+func (m *AIHelperManager) GetAIHelper(username, sessionID string) (*AIHelper, bool) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	userHelpers, ok := m.helpers[username]
+	if !ok {
+		return nil, false
+	}
+	helper, ok := userHelpers[sessionID]
+	return helper, ok
+}

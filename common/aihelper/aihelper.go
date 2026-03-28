@@ -53,6 +53,15 @@ func (h *AIHelper) AddMessage(content, username string, isUser, save bool) {
 	}
 }
 
+// GetMessages 获取所有历史消息
+func (h *AIHelper) GetMessages() []*model.Message {
+	h.mu.RLock()
+	defer h.mu.RUnlock()
+	out := make([]*model.Message, len(h.messages))
+	copy(out, h.messages)
+	return out
+}
+
 // GenerateResponse 同步生成消息
 func (h *AIHelper) GenerateResponse(ctx context.Context, username, userQuestion string) (*model.Message, error) {
 	// 1. 存储用户消息model.Message

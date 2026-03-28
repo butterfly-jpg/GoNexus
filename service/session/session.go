@@ -129,3 +129,37 @@ func StreamMessageToCurrentSession(username, sessionID, userQuestion, modelType 
 func ChatStreamSend(username, sessionID, userQuestion, modelType string, writer http.ResponseWriter) code.Code {
 	return StreamMessageToCurrentSession(username, sessionID, userQuestion, modelType, writer)
 }
+
+// GetUserSessionByUsername 获取本用户会话列表
+func GetUserSessionByUsername(username string) ([]model.SessionInfo, error) {
+	// 1. 获取用户的所有会话ID
+	globalManager := aihelper.GetGlobalManager()
+	sessionIDs := globalManager.GetUserSessions(username)
+	sessionInfos := make([]model.SessionInfo, 0, len(sessionIDs))
+	for _, sessionID := range sessionIDs {
+		sessionInfos = append(sessionInfos, model.SessionInfo{
+			SessionID: sessionID,
+			Title:     sessionID, // 后续优化，可以显示用户第一次提问的内容 todo
+		})
+	}
+	return sessionInfos, nil
+}
+
+// GetChatHistory 根据用户名和会话ID获取聊天记录
+func GetChatHistory(username, sessionID string) ([]model.History, code.Code) {
+	// 1. 获取用户会话的历史消息
+	globalManager := aihelper.GetGlobalManager()
+	helper, ok := globalManager.GetAIHelper(username, sessionID)
+	if !ok {
+		return nil, code.ServerBusyCode
+	}
+	messages := helper.GetMessages()
+	history := make([]model.History, len(messages))
+	for _, message := range messages {
+		history = append(history, model.History{
+			IsUser:  message.IsUser,
+			Content: message.Content,
+		})
+	}
+	return history, code.SuccessCode
+}

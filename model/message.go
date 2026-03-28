@@ -11,3 +11,9 @@ type Message struct {
 	IsUser    bool      `gorm:"not null;" json:"is_user"`
 	CreatedAt time.Time `json:"created_at"`
 }
+
+// History 当前会话的上下文消息历史
+type History struct {
+	IsUser  bool   `json:"is_user"`
+	Content string `json:"content"`
+}

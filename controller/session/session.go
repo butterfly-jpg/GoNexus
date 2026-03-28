@@ -3,8 +3,10 @@ package session
 import (
 	"GoNexus/common/code"
 	"GoNexus/controller"
+	"GoNexus/model"
 	"GoNexus/service/session"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -31,6 +33,20 @@ type (
 	// ChatSendResponse 同步聊天响应结构
 	ChatSendResponse struct {
 		AiInformation string `json:"information,omitempty"`
+		controller.Response
+	}
+	// GetUserSessionsResponse 获取用户会话列表响应结构
+	GetUserSessionsResponse struct {
+		controller.Response
+		Sessions []model.SessionInfo `json:"sessions,omitempty"`
+	}
+	// ChatHistoryRequest 聊天历史上下文请求结构
+	ChatHistoryRequest struct {
+		SessionID string `json:"sessionID,omitempty" binding:"required"`
+	}
+	// ChatHistoryResponse 聊天历史上下文响应结构
+	ChatHistoryResponse struct {
+		History []model.History `json:"history"`
 		controller.Response
 	}
 )
@@ -132,4 +148,42 @@ func ChatStreamSend(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"message": "send message failed"})
 		return
 	}
+}
+
+// GetUserSessionByUsername 获取本用户会话列表
+func GetUserSessionByUsername(c *gin.Context) {
+	// 1. 参数处理
+	res := &GetUserSessionsResponse{}
+	username := c.GetString("username")
+	// 2. 查询用户会话列表
+	userSessions, err := session.GetUserSessionByUsername(username)
+	if err != nil {
+		c.JSON(http.StatusOK, res.CodeOf(code.ServerBusyCode))
+		return
+	}
+	res.Success()
+	res.Sessions = userSessions
+	log.Println(res)
+	c.JSON(http.StatusOK, res)
+}
+
+// ChatHistory 获取当前会话ID下的上下文历史消息
+func ChatHistory(c *gin.Context) {
+	// 1. 参数处理
+	req := &ChatHistoryRequest{}
+	res := &ChatHistoryResponse{}
+	username := c.GetString("username")
+	if err := c.ShouldBindJSON(req); err != nil {
+		c.JSON(http.StatusOK, res.CodeOf(code.InvalidParamsCode))
+		return
+	}
+	// 2. 查询历史上下文消息
+	history, resCode := session.GetChatHistory(username, req.SessionID)
+	if resCode != code.SuccessCode {
+		c.JSON(http.StatusOK, res.CodeOf(resCode))
+		return
+	}
+	res.Success()
+	res.History = history
+	c.JSON(http.StatusOK, res)
 }

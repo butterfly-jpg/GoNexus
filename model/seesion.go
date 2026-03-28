@@ -15,3 +15,9 @@ type Session struct {
 	UpdatedAt time.Time      `json:"updated_at"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"_"`
 }
+
+// SessionInfo 会话信息
+type SessionInfo struct {
+	SessionID string `json:"sessionID"`
+	Title     string `json:"title"`
+}
