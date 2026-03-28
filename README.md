@@ -85,13 +85,12 @@
     - [✅] 调用 AI 模型获取完整回复
     - [✅] 构造异步消息发送至 RabbitMQ (存储历史)
     - [✅] 返回完整 JSON 响应
-- [ ] **流式对话接口 (SSE)**
-    - [ ] SSE配置（Content-Type、Cache-Control、Connection、Access-Control-Allow-Origin、X-Accel-Buffering）
-    - [ ] 建立SSE连接
-    - [ ] 实时接收 AI 模型流式片段并推送给前端
-    - [ ] 发送结束标记 "data: [DONE]\n\n"
-    - [ ] 异步将完整消息发送至 RabbitMQ (需处理流式拼接或回调存储)
-- [ ] **异步存储消费者**
+- [✅] **流式对话接口 (SSE)**
+    - [✅] SSE配置（Content-Type、Cache-Control、Connection、Access-Control-Allow-Origin、X-Accel-Buffering）
+    - [✅] 建立SSE连接
+    - [✅] 实时接收 AI 模型流式片段并推送给前端
+    - [✅] 发送结束标记 "data: [DONE]\n\n"
+- [✅] **异步存储消费者**
     - [✅] 监听消息队列
     - [✅] 解析消息并批量/单条写入（只实现了单条写入）
     ~~- [ ] 错误重试机制~~
