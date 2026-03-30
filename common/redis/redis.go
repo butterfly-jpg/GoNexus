@@ -85,7 +85,7 @@ func InitRedisIndex(ctx context.Context, filename string, dimension int) error {
 	}
 	fmt.Println("Creating Index:", indexName)
 	// 以文件名的前缀作为索引
-	prefix := generateIndexNamePrefix(filename)
+	prefix := GenerateIndexNamePrefix(filename)
 	createArgs := []interface{}{
 		"FT.CREATE", indexName,
 		"ON", "HASH",

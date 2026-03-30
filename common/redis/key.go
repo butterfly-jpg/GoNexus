@@ -16,7 +16,7 @@ func generateIndexName(filename string) string {
 	return fmt.Sprintf(config.DefaultRedisKeyConfig.IndexName, filename)
 }
 
-// generateIndexNamePrefix 根据文件名生成对应的前缀key
-func generateIndexNamePrefix(filename string) string {
+// GenerateIndexNamePrefix 根据文件名生成对应的前缀key
+func GenerateIndexNamePrefix(filename string) string {
 	return fmt.Sprintf(config.DefaultRedisKeyConfig.IndexNamePrefix, filename)
 }

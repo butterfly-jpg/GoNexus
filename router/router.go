@@ -16,8 +16,11 @@ func InitRouter() *gin.Engine {
 	AIGroup := enterRouter.Group("/ai")
 	AIGroup.Use(jwt.Auth())
 	RegisterAIRouter(AIGroup)
-	// 3. 注册图像识别模块 todo
+	// 3. 注册文件上传模块(rag)
+	FileGroup := enterRouter.Group("/file")
+	FileGroup.Use(jwt.Auth())
+	RegisterFileRouter(FileGroup)
+	// 4. 注册图像识别模块 todo
 
-	// 4. 注册文件上传模块 todo
 	return r
 }

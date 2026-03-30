@@ -2,6 +2,7 @@ package file
 
 import (
 	"GoNexus/common/rag"
+	"GoNexus/config"
 	"GoNexus/utils"
 	"context"
 	"io"
@@ -69,13 +70,28 @@ func UploadRagFile(username string, file *multipart.FileHeader) (string, error) 
 	}
 	log.Printf("File %s uploaded successfully", filePath)
 	// 8. 对上传的文件创建Rag索引
+	return CreatRagIndexForFile(filename, filePath)
 }
 
 // CreatRagIndexForFile 对文件创建Rag索引
 func CreatRagIndexForFile(filename, filepath string) (string, error) {
 	// 1. 创建RAG索引器并对文件进行向量化
-
+	indexer, err := rag.NewRAGIndexer(filename, config.GetConfig().RagModelConfig.RagEmbeddingModel)
+	if err != nil {
+		log.Printf("Create rag indexer failed. err: %v", err)
+		// 删除已上传的文件
+		os.Remove(filepath)
+		return "", err
+	}
 	// 2. 读取文件内容并创建向量索引
-
+	if err = indexer.IndexFile(context.Background(), filepath); err != nil {
+		log.Printf("Index file failed. err: %v", err)
+		// 删除已上传的文件和索引
+		os.Remove(filepath)
+		rag.DeleteIndex(context.Background(), filename)
+		return "", err
+	}
 	// 3 返回文件路径
+	log.Printf("File %s indexed successfully", filename)
+	return filepath, nil
 }
