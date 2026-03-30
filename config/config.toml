@@ -33,3 +33,8 @@ port= 5672
 username= "admin"
 password= "admin"
 vhost= "/"
+
+[ragModelConfig]
+embeddingModel= "text-embedding-v4"
+baseUrl= "https://dashscope.aliyuncs.com/compatible-mode/v1"
+dimension= 1024

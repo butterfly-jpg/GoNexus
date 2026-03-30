@@ -5,8 +5,13 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"math/rand"
+	"mime/multipart"
+	"os"
+	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
 	"GoNexus/config"
@@ -109,4 +114,31 @@ func ConvertToModelMessages(sessionID, username, content string) *model.Message 
 		Username:  username,
 		Content:   content,
 	}
+}
+
+// ValidateFile 校验文件是否为允许的本地文件,只支持.md和.txt文件
+func ValidateFile(file *multipart.FileHeader) error {
+	ext := strings.ToLower(filepath.Ext(file.Filename))
+	if ext != ".md" && ext != ".txt" {
+		return fmt.Errorf("file type must be .md or .txt, current file type is %s", ext)
+	}
+	return nil
+}
+
+// RemoveAllFilesInDir 删除目录中的所有文件（不删除子目录）
+func RemoveAllFilesInDir(dir string) error {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			// 说明连目录都不存在也就不需要再删除文件了
+			return nil
+		}
+		return err
+	}
+	for _, entry := range entries {
+		if err = os.Remove(filepath.Join(dir, entry.Name())); err != nil {
+			return err
+		}
+	}
+	return nil
 }

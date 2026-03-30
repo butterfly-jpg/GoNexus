@@ -1,0 +1,269 @@
+# 命令执行 docker-compose -f docker-compose-software-aliyun.yml up -d
+# docker 代理和使用文档；https://bugstack.cn/md/road-map/docker-what.html https://bugstack.cn/md/road-map/docker.html
+version: '3.9'
+services:
+#  # 注册中心 https://github.com/nacos-group/nacos-docker - 其他配置可参考(集群)
+#  # http://127.0.0.1:8848/nacos 【账号：nacos 密码：nacos】
+#  nacos:
+#    image: registry.cn-hangzhou.aliyuncs.com/xfg-studio/nacos-server:v2.2.3-slim
+#    container_name: nacos
+#    restart: always
+#    ports:
+#      - "8848:8848"
+#      - "9848:9848"
+#    environment:
+#      - PREFER_HOST_MODE=hostname
+#      - MODE=standalone
+#      - SPRING_DATASOURCE_PLATFORM=mysql
+#      - MYSQL_SERVICE_HOST=mysql
+#      - MYSQL_SERVICE_DB_NAME=nacos_config
+#      - MYSQL_SERVICE_PORT=3306
+#      - MYSQL_SERVICE_USER=root
+#      - MYSQL_SERVICE_PASSWORD=123456
+#      - MYSQL_SERVICE_DB_PARAM=characterEncoding=utf8&connectTimeout=1000&socketTimeout=3000&autoReconnect=true&useSSL=false&allowPublicKeyRetrieval=true
+#      - NACOS_AUTH_IDENTITY_KEY=2222
+#      - NACOS_AUTH_IDENTITY_VALUE=2xxx
+#      - NACOS_AUTH_TOKEN=SecretKey012345678901234567890123456789012345678901234567890123456789
+#    networks:
+#      - my-network
+#    depends_on:
+#      mysql:
+#        condition: service_healthy
+
+#  mysql:
+#    image: registry.cn-hangzhou.aliyuncs.com/xfg-studio/mysql:8.0.32
+#    container_name: mysql
+#    command: --default-authentication-plugin=mysql_native_password
+#    restart: always
+#    environment:
+#      TZ: Asia/Shanghai
+#      MYSQL_ROOT_PASSWORD: 123456
+#    ports:
+#      - "13306:3306"
+#    volumes:
+#      - ./mysql/my.cnf:/etc/mysql/conf.d/mysql.cnf:ro
+#      - ./mysql/sql:/docker-entrypoint-initdb.d
+#    healthcheck:
+#      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+#      interval: 5s
+#      timeout: 10s
+#      retries: 10
+#      start_period: 15s
+#    networks:
+#      - my-network
+
+#  # phpmyadmin https://hub.docker.com/_/phpmyadmin
+#  phpmyadmin:
+#    image: registry.cn-hangzhou.aliyuncs.com/xfg-studio/phpmyadmin:5.2.1
+#    container_name: phpmyadmin
+#    hostname: phpmyadmin
+#    ports:
+#      - 8899:80
+#    environment:
+#      - PMA_HOST=mysql
+#      - PMA_PORT=3306
+#      - MYSQL_ROOT_PASSWORD=123qwe!@#QWE
+#    depends_on:
+#      mysql:
+#        condition: service_healthy
+#    networks:
+#      - my-network
+
+#  # Redis
+#  redis:
+#    image: registry.cn-hangzhou.aliyuncs.com/xfg-studio/redis:6.2
+#    container_name: redis
+#    restart: always
+#    hostname: redis
+#    privileged: true
+#    ports:
+#      - 16379:6379
+#    volumes:
+#      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
+#    command: redis-server /usr/local/etc/redis/redis.conf
+#    networks:
+#      - my-network
+#    healthcheck:
+#      test: [ "CMD", "redis-cli", "ping" ]
+#      interval: 10s
+#      timeout: 5s
+#      retries: 3
+
+ # 内置redisearch模块的redis镜像
+ redis:
+   # image: registry.cn-hangzhou.aliyuncs.com/xfg-studio/redis:6.2 # 注释掉原来的
+   image: redislabs/redismod:latest # 使用包含模块的官方镜像
+   container_name: redis
+   restart: always
+   hostname: redis
+   privileged: true
+   ports:
+    - 16379:6379
+  # 移除 volumes 和 command，除非你有特殊配置需求
+  # 如果你必须使用自定义的 redis.conf，请参考方案二
+   networks:
+     - my-network
+   healthcheck:
+     test: [ "CMD", "redis-cli", "ping" ]
+     interval: 10s
+     timeout: 5s
+     retries: 3
+
+#  # RedisAdmin https://github.com/joeferner/redis-commander
+#  # 账密 admin/admin
+#  redis-admin:
+#    image: registry.cn-hangzhou.aliyuncs.com/xfg-studio/redis-commander:0.8.0
+#    container_name: redis-admin
+#    hostname: redis-commander
+#    restart: always
+#    ports:
+#      - 8081:8081
+#    environment:
+#      - REDIS_HOSTS=local:redis:6379
+#      - HTTP_USER=admin
+#      - HTTP_PASSWORD=admin
+#      - LANG=C.UTF-8
+#      - LANGUAGE=C.UTF-8
+#      - LC_ALL=C.UTF-8
+#    networks:
+#      - my-network
+#    depends_on:
+#      redis:
+#        condition: service_healthy
+
+  # rabbitmq
+  # 账密 admin/admin
+  # rabbitmq-plugins enable rabbitmq_management
+#  rabbitmq:
+#    image: registry.cn-hangzhou.aliyuncs.com/xfg-studio/rabbitmq:3.12.9
+#    container_name: rabbitmq
+#    restart: always
+#    ports:
+#      - "5672:5672"
+#      - "15672:15672"
+#    environment:
+#      RABBITMQ_DEFAULT_USER: admin
+#      RABBITMQ_DEFAULT_PASS: admin
+#    command: rabbitmq-server
+#    volumes:
+#      - ./rabbitmq/enabled_plugins:/etc/rabbitmq/enabled_plugins
+#    networks:
+#      - my-network
+
+#  elasticsearch:
+#    image: registry.cn-hangzhou.aliyuncs.com/xfg-studio/elasticsearch:7.17.28
+#    ports:
+#      - '9200:9200'
+#      - '9300:9300'
+#    container_name: elasticsearch
+#    restart: always
+#    environment:
+#      - 'cluster.name=elasticsearch' # 设置集群名称为elasticsearch
+#      - 'discovery.type=single-node' # 以单一节点模式启动
+#      - "cluster.name=docker-cluster" # 设置名称
+#      - 'ES_JAVA_OPTS=-Xms512m -Xmx512m' # 设置使用jvm内存大小
+#    networks:
+#      - my-network
+
+#  logstash:
+#    image: registry.cn-hangzhou.aliyuncs.com/xfg-studio/logstash:7.17.28
+#    container_name: logstash
+#    restart: always
+#    volumes:
+#      - /etc/localtime:/etc/localtime
+#      - ./logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+#    ports:
+#      - '4560:4560'
+#      - '50000:50000/tcp'
+#      - '50000:50000/udp'
+#      - '9600:9600'
+#    environment:
+#      LS_JAVA_OPTS: -Xms1024m -Xmx1024m
+#      TZ: Asia/Shanghai
+#      MONITORING_ENABLED: false
+#    links:
+#      - elasticsearch:es # 可以用es这个域名访问elasticsearch服务
+#    networks:
+#      - my-network
+#    depends_on:
+#      - elasticsearch # 依赖elasticsearch启动后在启动logstash
+
+#  kibana:
+#    image: registry.cn-hangzhou.aliyuncs.com/xfg-studio/kibana:7.17.28
+#    container_name: kibana
+#    restart: always
+#    volumes:
+#      - /etc/localtime:/etc/localtime
+#      - ./kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml
+#    ports:
+#      - '5601:5601'
+#    links:
+#      - elasticsearch:es #可以用es这个域名访问elasticsearch服务
+#    environment:
+#      - ELASTICSEARCH_URL=http://elasticsearch:9200 #设置访问elasticsearch的地址
+#      - 'elasticsearch.hosts=http://es:9200' #设置访问elasticsearch的地址
+#      - I18N_LOCALE=zh-CN
+#    networks:
+#      - my-network
+#    depends_on:
+#      - elasticsearch
+
+  # 对话模型
+  # ollama pull deepseek-r1:1.5b
+  # 运行模型
+  # ollama run deepseek-r1:1.5b
+  # 联网模型
+  # ollama pull nomic-embed-text
+#  ollama:
+#    image: registry.cn-hangzhou.aliyuncs.com/xfg-studio/ollama:0.5.10
+#    container_name: ollama
+#    restart: unless-stopped
+#    ports:
+#      - "11434:11434"
+#    networks:
+#      - my-network
+
+  # 软件；https://www.postgresql.org/ftp/pgadmin/pgadmin4
+#  pgvector:
+#    image: registry.cn-hangzhou.aliyuncs.com/xfg-studio/pgvector:v0.5.0
+#    container_name: pgvector
+#    restart: always
+#    environment:
+#      - POSTGRES_USER=postgres
+#      - POSTGRES_PASSWORD=postgres
+#      - POSTGRES_DB=postgres
+#      - PGPASSWORD=postgres
+#    volumes:
+#      - ./pgvector/sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+#    logging:
+#      options:
+#        max-size: 10m
+#        max-file: "3"
+#    ports:
+#      - '15432:5432'
+#    healthcheck:
+#      test: "pg_isready -U postgres -d ai-rag-knowledge"
+#      interval: 2s
+#      timeout: 20s
+#      retries: 10
+#    networks:
+#      - my-network
+
+  # pg 管理工具
+#  pgvector-admin:
+#    image: registry.cn-hangzhou.aliyuncs.com/xfg-studio/pgadmin4:9.1.0
+#    container_name: pgvector-admin
+#    restart: always
+#    ports:
+#      - "5050:80"
+#    environment:
+#      PGADMIN_DEFAULT_EMAIL: admin@qq.com
+#      PGADMIN_DEFAULT_PASSWORD: admin
+#    depends_on:
+#      - pgvector
+#    networks:
+#      - my-network
+
+networks:
+  my-network:
+    driver: bridge

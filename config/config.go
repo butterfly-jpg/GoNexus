@@ -33,6 +33,13 @@ type RabbitmqConfig struct {
 	RabbitmqVhost    string `toml:"vhost"`
 }
 
+// RagModelConfig Rag模型配置结构体
+type RagModelConfig struct {
+	RagEmbeddingModel string `toml:"embeddingModel"`
+	RagBaseUrl        string `toml:"baseUrl"`
+	RagDimension      int    `toml:"dimension"`
+}
+
 // EmailConfig 邮箱的配置结构体
 type EmailConfig struct {
 	Authcode string `toml:"authcode"`
@@ -40,11 +47,15 @@ type EmailConfig struct {
 }
 
 type RedisKeyConfig struct {
-	CaptchaPrefix string
+	CaptchaPrefix   string
+	IndexName       string
+	IndexNamePrefix string
 }
 
 var DefaultRedisKeyConfig = RedisKeyConfig{
-	CaptchaPrefix: "captcha:%s",
+	CaptchaPrefix:   "captcha:%s",
+	IndexName:       "rag_docs:%s:idx",
+	IndexNamePrefix: "rag_docs:%s:",
 }
 
 // JWTConfig JWT的配置结构体
@@ -70,6 +81,7 @@ type Config struct {
 	RabbitmqConfig `toml:"rabbitmqConfig"`
 	EmailConfig    `toml:"emailConfig"`
 	JWTConfig      `toml:"jwtConfig"`
+	RagModelConfig `toml:"ragModelConfig"`
 }
 
 var config *Config

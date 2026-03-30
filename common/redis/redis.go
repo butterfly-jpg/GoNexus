@@ -58,7 +58,50 @@ func SetCaptchaForEmail(email, captcha string) error {
 	return Rdb.Set(ctx, key, captcha, expire).Err()
 }
 
-// generateCaptcha 根据邮箱生成对应的key
-func generateCaptcha(email string) string {
-	return fmt.Sprintf(config.DefaultRedisKeyConfig.CaptchaPrefix, email)
+// DeleteRedisIndex 删除 Redis 索引
+func DeleteRedisIndex(ctx context.Context, filename string) error {
+	// 1. 生成索引
+	indexName := generateIndexName(filename)
+	// 2. 删除对应的索引
+	if err := Rdb.Do(ctx, "FT.DROPINDEX", indexName).Err(); err != nil {
+		return fmt.Errorf("delete index failed. err: %v", err)
+	}
+	fmt.Println("delete index success. index name: ", indexName)
+	return nil
+}
+
+// InitRedisIndex 初始化 Redis 索引
+func InitRedisIndex(ctx context.Context, filename string, dimension int) error {
+	// 1. 检查索引是否存在,存在就跳过
+	indexName := generateIndexName(filename)
+	_, err := Rdb.Do(ctx, "FT.INFO", indexName).Result()
+	if err == nil {
+		fmt.Println("Index already exists, skip creation.")
+		return nil
+	}
+	// 2. 如果索引不存在就创建新索引
+	if !strings.Contains(err.Error(), "Unknow index name") {
+		return fmt.Errorf("check Index Failure: %w", err)
+	}
+	fmt.Println("Creating Index:", indexName)
+	// 以文件名的前缀作为索引
+	prefix := generateIndexNamePrefix(filename)
+	createArgs := []interface{}{
+		"FT.CREATE", indexName,
+		"ON", "HASH",
+		"PREFIX", "1", prefix,
+		"SCHEMA",
+		"content", "TEXT",
+		"metadata", "TEXT",
+		"vector", "VECTOR", "FLAT",
+		"6",
+		"TYPE", "FLOAT32",
+		"DIM", dimension,
+		"DISTANCE_METRIC", "COSINE",
+	}
+	if err = Rdb.Do(ctx, createArgs...).Err(); err != nil {
+		return fmt.Errorf("create index failed. err: %v", err)
+	}
+	fmt.Println("create index success.")
+	return nil
 }
