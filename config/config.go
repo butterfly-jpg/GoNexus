@@ -36,6 +36,7 @@ type RabbitmqConfig struct {
 // RagModelConfig Rag模型配置结构体
 type RagModelConfig struct {
 	RagEmbeddingModel string `toml:"embeddingModel"`
+	RagChatModelName  string `toml:"chatModelName"`
 	RagBaseUrl        string `toml:"baseUrl"`
 	RagDimension      int    `toml:"dimension"`
 }

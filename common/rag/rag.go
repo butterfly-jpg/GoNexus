@@ -10,17 +10,26 @@ import (
 	redispkg "GoNexus/common/redis"
 
 	"github.com/cloudwego/eino/components/embedding"
+	"github.com/cloudwego/eino/components/retriever"
 	"github.com/cloudwego/eino/schema"
 	"github.com/google/uuid"
+	"github.com/redis/go-redis/v9"
 
 	embeddingark "github.com/cloudwego/eino-ext/components/embedding/ark"
 	redisindexer "github.com/cloudwego/eino-ext/components/indexer/redis"
+	redisretriever "github.com/cloudwego/eino-ext/components/retriever/redis"
 )
 
 // RAGIndexer RAG索引器
 type RAGIndexer struct {
 	embedding embedding.Embedder
 	indexer   *redisindexer.Indexer
+}
+
+// RAGQuery RAG查询器
+type RAGQuery struct {
+	embedding embedding.Embedder
+	retriever retriever.Retriever
 }
 
 // DeleteIndex 删除指定文件的知识库索引
@@ -117,4 +126,72 @@ func (r *RAGIndexer) IndexFile(ctx context.Context, filePath string) error {
 		return fmt.Errorf("store documents failed. err: %v", err)
 	}
 	return nil
+}
+
+// NewRAGQuery 创建RAG查询器,用于向量检索和问答
+func NewRAGQuery(ctx context.Context, username string) (*RAGQuery, error) {
+	// 1. 创建embedding组件
+	embedConfig := &embeddingark.EmbeddingConfig{
+		BaseURL: config.GetConfig().RagBaseUrl,
+		APIKey:  os.Getenv("QWEN_API_KEY"), // 通义千问的API
+		Model:   config.GetConfig().RagEmbeddingModel,
+	}
+	embedder, err := embeddingark.NewEmbedder(ctx, embedConfig)
+	if err != nil {
+		return nil, fmt.Errorf("create embedder failed. err: %v", err)
+	}
+	// 2. 获取用户上传的文件（目前只支持用户上传一个文件）
+	userDir := fmt.Sprintf("uploads/%s", username)
+	files, err := os.ReadDir(userDir)
+	if err != nil || len(files) == 0 {
+		return nil, fmt.Errorf("no uploaded file found for user %s", username)
+	}
+	var filename string
+	for _, f := range files {
+		if !f.IsDir() {
+			filename = f.Name()
+			break
+		}
+	}
+	if filename == "" {
+		return nil, fmt.Errorf("no valid file found for user %s", username)
+	}
+	// 3. 创建retriever组件
+	// 3.1 设置召回器的配置
+	// 生成索引
+	indexName := redispkg.GenerateIndexName(filename)
+	retrieverConfig := &redisretriever.RetrieverConfig{
+		Client:       redispkg.Rdb,
+		Index:        indexName,
+		Dialect:      2,
+		ReturnFields: []string{"content", "metadata", "distance"},
+		TopK:         5,
+		VectorField:  "vector",
+		Embedding:    embedder,
+		DocumentConverter: func(ctx context.Context, doc redis.Document) (*schema.Document, error) {
+			resp := &schema.Document{
+				ID:       doc.ID,
+				Content:  "",
+				MetaData: map[string]any{},
+			}
+			for field, value := range doc.Fields {
+				if field == "content" {
+					resp.Content = value
+				} else {
+					resp.MetaData[field] = value
+				}
+			}
+			return resp, nil
+		},
+	}
+	// 3.2 创建召回器实例
+	rtr, err := redisretriever.NewRetriever(ctx, retrieverConfig)
+	if err != nil {
+		return nil, fmt.Errorf("create retriever failed. err: %v", err)
+	}
+	// 4. 返回封装好的RAGQuery,包含向量生成器和召回器
+	return &RAGQuery{
+		embedding: embedder,
+		retriever: rtr,
+	}, nil
 }

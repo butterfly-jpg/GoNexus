@@ -11,8 +11,8 @@ func generateCaptcha(email string) string {
 	return fmt.Sprintf(config.DefaultRedisKeyConfig.CaptchaPrefix, email)
 }
 
-// generateIndexName 根据文件名生成对应的key
-func generateIndexName(filename string) string {
+// GenerateIndexName 根据文件名生成对应的key
+func GenerateIndexName(filename string) string {
 	return fmt.Sprintf(config.DefaultRedisKeyConfig.IndexName, filename)
 }
 

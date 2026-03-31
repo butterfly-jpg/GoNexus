@@ -100,16 +100,18 @@
 ---
 
 ## 📄 模块四：增强检索生成（RAG）
-- [ ] **文件上传服务**
+- [✅] **文件上传服务**
     - [✅] 实现文件上传接口 UploadingRagFile
     - [✅] 基于 eino 框架和 Redisearcb 模块实现 Embedding 实例初始化
     - [✅] 基于 eino 框架和 Redisearcb 模块实现 Indexer 实例初始化
-    - [ ] 基于 eino 框架和 Redisearch 模块实现 Retriever 实例初始化
+    - [✅] 基于 eino 框架和 Redisearch 模块实现 Retriever 实例初始化
 - [ ] **RAG服务**
     - [✅] 实现文件解析（未实现文本切块,目前只简单处理成一个文档）
     - [✅] 实现向量化处理
     - [✅] 实现向量入库功能（采用redis的redisearch模块实现存储向量）
-    - [ ] 实现向量索引和检索筛选功能
+    - [✅] 实现向量索引和检索筛选功能
+    - [ ] 实现RAG模式下的同步对话方法 GenerateResponse
+    - [ ] 实现RAG模式下的流式对话方法 StreamResponse
 
 ## 🖼️ 模块五：图像识别系统 (Vision Service)
 - [ ] **模型资源准备**

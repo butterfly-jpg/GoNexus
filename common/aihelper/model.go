@@ -1,6 +1,7 @@
 package aihelper
 
 import (
+	"GoNexus/config"
 	"context"
 	"errors"
 	"fmt"
@@ -158,4 +159,40 @@ func (q *QwenModel) StreamResponse(ctx context.Context, messages []*schema.Messa
 // GetModelType 获取模型类型,Qwen是2号模型
 func (q *QwenModel) GetModelType() string {
 	return "2"
+}
+
+// =========================== RAG 实现(基于千问模型) =========================
+
+// QwenRAGModel 接入Qwen大模型的Rag服务结构体
+type QwenRAGModel struct {
+	llm      model.ToolCallingChatModel
+	username string
+}
+
+// NewQwenRAGModel 获取Qwen-Rag模型实例
+func NewQwenRAGModel(ctx context.Context, username string) (*QwenRAGModel, error) {
+	llm, err := qwen.NewChatModel(ctx, &qwen.ChatModelConfig{
+		APIKey:  os.Getenv("QWEN_API_KEY"),
+		BaseURL: config.GetConfig().RagBaseUrl,
+		Model:   config.GetConfig().RagChatModelName,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("create qwen rag model failed. err: %v", err)
+	}
+	return &QwenRAGModel{llm: llm, username: username}, nil
+}
+
+// GenerateResponse QwenRag同步生成回复方法实现
+func (q *QwenRAGModel) GenerateResponse(ctx context.Context, messages []*schema.Message) (*schema.Message, error) {
+	// 1. 创建RAG查询器
+	// 测试压缩提交
+	// 2. 获取用户的最后一条消息提问
+
+	// 3. 检索相关文档
+
+	// 4. 将用户的提问和检索后的结果组装在一起构建新的RAG提示词
+
+	// 5. 将最后一条消息替换为新的RAG提示词
+
+	// 6. 调用LLM生成回答
 }

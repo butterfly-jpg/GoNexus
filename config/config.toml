@@ -36,5 +36,6 @@ vhost= "/"
 
 [ragModelConfig]
 embeddingModel= "text-embedding-v4"
+chatModelName = "qwen-plus"
 baseUrl= "https://dashscope.aliyuncs.com/compatible-mode/v1"
 dimension= 1024

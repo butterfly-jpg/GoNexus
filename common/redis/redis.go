@@ -26,10 +26,11 @@ func InitRedis() {
 
 	Rdb = redis.NewClient(&redis.Options{
 		Addr:     addr,
-		Protocol: 2,
+		Protocol: 2, // 支持Redis向量检索
 		Password: password,
 		DB:       db,
 	})
+	Rdb.Options().UnstableResp3 = true // 支持Redis向量检索
 }
 
 // CheckCaptchaForEmail 检验邮箱对应的验证码缓存是否有效
@@ -61,7 +62,7 @@ func SetCaptchaForEmail(email, captcha string) error {
 // DeleteRedisIndex 删除 Redis 索引
 func DeleteRedisIndex(ctx context.Context, filename string) error {
 	// 1. 生成索引
-	indexName := generateIndexName(filename)
+	indexName := GenerateIndexName(filename)
 	// 2. 删除对应的索引
 	if err := Rdb.Do(ctx, "FT.DROPINDEX", indexName).Err(); err != nil {
 		return fmt.Errorf("delete index failed. err: %v", err)
@@ -73,7 +74,7 @@ func DeleteRedisIndex(ctx context.Context, filename string) error {
 // InitRedisIndex 初始化 Redis 索引
 func InitRedisIndex(ctx context.Context, filename string, dimension int) error {
 	// 1. 检查索引是否存在,存在就跳过
-	indexName := generateIndexName(filename)
+	indexName := GenerateIndexName(filename)
 	_, err := Rdb.Do(ctx, "FT.INFO", indexName).Result()
 	if err == nil {
 		fmt.Println("Index already exists, skip creation.")

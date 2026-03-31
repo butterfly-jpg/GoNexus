@@ -18,6 +18,7 @@ require (
 	github.com/cloudwego/eino-ext/components/indexer/redis v0.0.0-20260323112355-f061db7e8419 // indirect
 	github.com/cloudwego/eino-ext/components/model/deepseek v0.1.2 // indirect
 	github.com/cloudwego/eino-ext/components/model/qwen v0.1.6 // indirect
+	github.com/cloudwego/eino-ext/components/retriever/redis v0.0.0-20260331071634-4f359694d2d9 // indirect
 	github.com/cloudwego/eino-ext/libs/acl/openai v0.1.14 // indirect
 	github.com/cohesion-org/deepseek-go v1.3.2 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect

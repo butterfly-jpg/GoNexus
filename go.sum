@@ -39,6 +39,8 @@ github.com/cloudwego/eino-ext/components/model/deepseek v0.1.2 h1:PSHIDLUOv3ZCO7
 github.com/cloudwego/eino-ext/components/model/deepseek v0.1.2/go.mod h1:beCP+L7CsxDz4+DvBjo8iR/v/ZBPpmQfJtrqG280rjw=
 github.com/cloudwego/eino-ext/components/model/qwen v0.1.6 h1:VH6do7nc6hmI1pkyxXKtN0fpqRF/4JBzzpcunuyudZU=
 github.com/cloudwego/eino-ext/components/model/qwen v0.1.6/go.mod h1:Z2/NKi5YY0xehdHPnssYuQ4v7G6j8Nbv24dpPAhWYA0=
+github.com/cloudwego/eino-ext/components/retriever/redis v0.0.0-20260331071634-4f359694d2d9 h1:gSgX3LQxiZQHzaip1kUePXgv/H20UP1z/tE3x9dJCfc=
+github.com/cloudwego/eino-ext/components/retriever/redis v0.0.0-20260331071634-4f359694d2d9/go.mod h1:C+JX7vgZmt/XBEXCS2KeJvyVBUeQ0Aem+xTI8AWdx3s=
 github.com/cloudwego/eino-ext/libs/acl/openai v0.1.14 h1:yOZII6VYaL00CVZYba+HUixFygsW0Xz/1QjQ5htj1Ls=
 github.com/cloudwego/eino-ext/libs/acl/openai v0.1.14/go.mod h1:1xMQZ8eE11pkEoTAEy8UlaAY817qGVMvjpDPGSIO3Ns=
 github.com/cohesion-org/deepseek-go v1.3.2 h1:WTZ/2346KFYca+n+DL5p+Ar1RQxF2w/wGkU4jDvyXaQ=
