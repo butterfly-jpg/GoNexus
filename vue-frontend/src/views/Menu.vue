@@ -1,41 +1,96 @@
 <template>
   <div class="menu-container">
-    <el-header class="header">
-      <h1>AI应用平台</h1>
-      <el-button type="danger" @click="handleLogout">退出登录</el-button>
-    </el-header>
-    <el-main class="main">
-      <div class="menu-grid">
-        <el-card class="menu-item" @click="$router.push('/ai-chat')">
-          <div class="card-content">
-            <el-icon size="48" color="#409eff"><ChatDotRound /></el-icon>
-            <h3>AI聊天</h3>
-            <p>与AI进行智能对话</p>
-          </div>
-        </el-card>
-        <el-card class="menu-item" @click="$router.push('/image-recognition')">
-          <div class="card-content">
-            <el-icon size="48" color="#67c23a"><Camera /></el-icon>
-            <h3>图像识别</h3>
-            <p>上传图片进行AI识别</p>
-          </div>
-        </el-card>
+    <!-- 背景光球 -->
+    <div class="bg-orb orb1"></div>
+    <div class="bg-orb orb2"></div>
+    <div class="bg-orb orb3"></div>
+
+    <!-- 顶部导航栏 -->
+    <header class="header">
+      <div class="brand">
+        <span class="brand-icon">✦</span>
+        <span class="brand-name">GoNexus</span>
       </div>
-    </el-main>
+      <button class="logout-btn" @click="handleLogout">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        退出登录
+      </button>
+    </header>
+
+    <!-- 主内容 -->
+    <main class="main">
+      <div class="welcome-section">
+        <div class="welcome-glow">✦</div>
+        <h2 class="welcome-title">选择你的 AI 功能</h2>
+        <p class="welcome-sub">基于前沿大模型，为你提供智能化的应用体验</p>
+      </div>
+
+      <div class="menu-grid">
+        <!-- AI 聊天 -->
+        <div class="menu-card" @click="$router.push('/ai-chat')">
+          <div class="card-glow card-glow-purple"></div>
+          <div class="card-inner">
+            <div class="card-icon icon-purple">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              </svg>
+            </div>
+            <div class="card-text">
+              <h3>AI 聊天</h3>
+              <p>多模型智能对话，支持流式输出与 RAG 知识检索</p>
+            </div>
+            <div class="card-arrow">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="5" y1="12" x2="19" y2="12"/>
+                <polyline points="12 5 19 12 12 19"/>
+              </svg>
+            </div>
+          </div>
+          <div class="card-tag">DeepSeek · Qwen · RAG</div>
+        </div>
+
+        <!-- 图像识别 -->
+        <div class="menu-card" @click="$router.push('/image-recognition')">
+          <div class="card-glow card-glow-cyan"></div>
+          <div class="card-inner">
+            <div class="card-icon icon-cyan">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <polyline points="21 15 16 10 5 21"/>
+              </svg>
+            </div>
+            <div class="card-text">
+              <h3>图像识别</h3>
+              <p>上传图片，AI 自动分析内容、识别物体与场景</p>
+            </div>
+            <div class="card-arrow">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="5" y1="12" x2="19" y2="12"/>
+                <polyline points="12 5 19 12 12 19"/>
+              </svg>
+            </div>
+          </div>
+          <div class="card-tag">Vision · 多模态</div>
+        </div>
+      </div>
+
+      <!-- 底部说明 -->
+      <p class="footer-tip">点击卡片进入对应功能</p>
+    </main>
   </div>
 </template>
 
 <script>
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { ChatDotRound, Camera } from '@element-plus/icons-vue'
 
 export default {
   name: 'MenuView',
-  components: {
-    ChatDotRound,
-    Camera
-  },
   setup() {
     const router = useRouter()
 
@@ -50,197 +105,326 @@ export default {
         ElMessage.success('退出登录成功')
         router.push('/login')
       } catch {
-        // 用户取消操作
+        // 用户取消
       }
     }
 
-    return {
-      handleLogout
-    }
+    return { handleLogout }
   }
 }
 </script>
 
 <style scoped>
+/* ===== 基础布局 ===== */
 .menu-container {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #0d0d1a;
   position: relative;
   overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: #e2e2f0;
 }
 
-.menu-container::before {
-  content: '';
+/* ===== 背景光球 ===== */
+.bg-orb {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.05)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.05)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.05)"/><circle cx="90" cy="40" r="0.8" fill="rgba(255,255,255,0.05)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
-  animation: grainMove 30s linear infinite;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.16;
+  pointer-events: none;
+}
+.orb1 {
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, #7c3aed, transparent);
+  top: -180px; left: -120px;
+  animation: orbFloat1 20s ease-in-out infinite;
+}
+.orb2 {
+  width: 450px; height: 450px;
+  background: radial-gradient(circle, #06b6d4, transparent);
+  bottom: -80px; right: -60px;
+  animation: orbFloat2 25s ease-in-out infinite;
+}
+.orb3 {
+  width: 320px; height: 320px;
+  background: radial-gradient(circle, #a855f7, transparent);
+  top: 50%; left: 55%;
+  animation: orbFloat3 17s ease-in-out infinite;
+}
+@keyframes orbFloat1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(80px, 50px) scale(1.08); }
+  66% { transform: translate(-30px, 90px) scale(0.92); }
+}
+@keyframes orbFloat2 {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(-90px, -70px) scale(1.12); }
+}
+@keyframes orbFloat3 {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(50px, -100px); }
 }
 
-@keyframes grainMove {
-  0% { transform: translate(0, 0); }
-  100% { transform: translate(100px, 100px); }
-}
-
+/* ===== 顶部导航 ===== */
 .header {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  color: white;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 0 30px;
-  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  justify-content: space-between;
+  padding: 20px 40px;
+  background: rgba(13, 13, 26, 0.8);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(124, 58, 237, 0.15);
   position: relative;
-  z-index: 2;
+  z-index: 10;
 }
 
-.header h1 {
-  margin: 0;
-  font-size: 28px;
-  font-weight: 600;
-  background: linear-gradient(135deg, #ffffff 0%, rgba(255,255,255,0.8) 100%);
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.brand-icon {
+  font-size: 22px;
+  background: linear-gradient(135deg, #7c3aed, #06b6d4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: iconPulse 3s ease-in-out infinite;
+}
+@keyframes iconPulse {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.5); }
+}
+.brand-name {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  background: linear-gradient(135deg, #c4b5fd, #e0f2fe);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-.el-button {
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: white;
-  transition: all 0.3s ease;
+.logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 18px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: #94a3b8;
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+.logout-btn:hover {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.1);
 }
 
-.el-button:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-}
-
+/* ===== 主内容 ===== */
 .main {
   flex: 1;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
+  padding: 60px 40px;
   position: relative;
-  z-index: 1;
+  z-index: 5;
 }
 
+/* 欢迎区 */
+.welcome-section {
+  text-align: center;
+  margin-bottom: 56px;
+  animation: fadeUp 0.7s ease-out both;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.welcome-glow {
+  font-size: 52px;
+  background: linear-gradient(135deg, #7c3aed, #06b6d4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 20px;
+  display: inline-block;
+  animation: glowPulse 3s ease-in-out infinite;
+}
+@keyframes glowPulse {
+  0%, 100% { filter: brightness(1) drop-shadow(0 0 10px rgba(124, 58, 237, 0.4)); }
+  50% { filter: brightness(1.4) drop-shadow(0 0 28px rgba(6, 182, 212, 0.5)); }
+}
+
+.welcome-title {
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0 0 12px;
+  background: linear-gradient(135deg, #f8fafc 0%, #c4b5fd 60%, #67e8f9 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.3px;
+}
+
+.welcome-sub {
+  font-size: 15px;
+  color: #4b5563;
+  margin: 0;
+}
+
+/* ===== 卡片网格 ===== */
 .menu-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 40px;
-  max-width: 900px;
+  gap: 28px;
+  max-width: 800px;
   width: 100%;
-  padding: 40px;
-  animation: gridFadeIn 1s ease-out;
+  animation: fadeUp 0.7s ease-out 0.15s both;
 }
 
-@keyframes gridFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(50px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.menu-item {
-  cursor: pointer;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(15px);
-  border-radius: 20px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+/* 卡片 */
+.menu-card {
   position: relative;
+  background: rgba(20, 17, 38, 0.85);
+  border: 1px solid rgba(124, 58, 237, 0.18);
+  border-radius: 20px;
+  padding: 28px;
+  cursor: pointer;
   overflow: hidden;
-  animation: cardSlideIn 0.8s ease-out both;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(12px);
 }
 
-.menu-item:nth-child(1) { animation-delay: 0.1s; }
-.menu-item:nth-child(2) { animation-delay: 0.2s; }
-
-@keyframes cardSlideIn {
-  from {
-    opacity: 0;
-    transform: translateY(60px) rotateX(10deg);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) rotateX(0deg);
-  }
-}
-
-.menu-item::before {
-  content: '';
+/* 悬停时的光晕 */
+.card-glow {
   position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-  transition: left 0.6s;
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+.card-glow-purple { background: #7c3aed; top: -60px; right: -40px; }
+.card-glow-cyan   { background: #06b6d4; top: -60px; right: -40px; }
+
+.menu-card:hover .card-glow { opacity: 0.25; }
+.menu-card:hover {
+  transform: translateY(-6px) scale(1.01);
+  border-color: rgba(124, 58, 237, 0.45);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(124, 58, 237, 0.2);
 }
 
-.menu-item:hover::before {
-  left: 100%;
-}
-
-.menu-item:hover {
-  transform: translateY(-15px) scale(1.05);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
-}
-
-.card-content {
-  text-align: center;
-  padding: 50px 30px;
+/* 卡片内部布局 */
+.card-inner {
+  display: flex;
+  align-items: center;
+  gap: 18px;
   position: relative;
   z-index: 1;
 }
 
-.el-icon {
-  display: block;
-  margin: 0 auto 20px;
-  transition: all 0.3s ease;
+/* 图标 */
+.card-icon {
+  width: 64px; height: 64px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.35s ease;
+}
+.icon-purple {
+  background: rgba(124, 58, 237, 0.18);
+  border: 1px solid rgba(124, 58, 237, 0.3);
+  color: #a78bfa;
+}
+.icon-cyan {
+  background: rgba(6, 182, 212, 0.12);
+  border: 1px solid rgba(6, 182, 212, 0.25);
+  color: #67e8f9;
+}
+.menu-card:hover .icon-purple {
+  background: rgba(124, 58, 237, 0.3);
+  box-shadow: 0 0 20px rgba(124, 58, 237, 0.35);
+  color: #c4b5fd;
+}
+.menu-card:hover .icon-cyan {
+  background: rgba(6, 182, 212, 0.22);
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.3);
+  color: #a5f3fc;
 }
 
-.menu-item:hover .el-icon {
-  transform: scale(1.2) rotate(5deg);
+/* 文字 */
+.card-text {
+  flex: 1;
+  min-width: 0;
 }
-
-.card-content h3 {
-  margin: 0 0 15px 0;
-  color: #2c3e50;
-  font-size: 24px;
-  font-weight: 600;
-  transition: all 0.3s ease;
+.card-text h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #e2e8f0;
+  margin: 0 0 6px;
+  transition: color 0.25s;
 }
-
-.menu-item:hover h3 {
-  color: #409eff;
-  transform: translateY(-5px);
-}
-
-.card-content p {
+.menu-card:hover .card-text h3 { color: #f8fafc; }
+.card-text p {
+  font-size: 13px;
+  color: #4b5563;
   margin: 0;
-  color: #7f8c8d;
-  font-size: 16px;
   line-height: 1.6;
+  transition: color 0.25s;
+}
+.menu-card:hover .card-text p { color: #6b7280; }
+
+/* 箭头 */
+.card-arrow {
+  color: #374151;
+  flex-shrink: 0;
+  transform: translateX(0);
   transition: all 0.3s ease;
 }
+.menu-card:hover .card-arrow {
+  color: #a78bfa;
+  transform: translateX(4px);
+}
 
-.menu-item:hover p {
-  color: #34495e;
-  transform: translateY(-3px);
+/* 标签 */
+.card-tag {
+  margin-top: 18px;
+  font-size: 12px;
+  color: #374151;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  padding: 6px 12px;
+  display: inline-block;
+  position: relative;
+  z-index: 1;
+  letter-spacing: 0.4px;
+  transition: all 0.25s;
+}
+.menu-card:hover .card-tag {
+  color: #6b7280;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* 底部提示 */
+.footer-tip {
+  margin-top: 44px;
+  font-size: 13px;
+  color: rgba(75, 85, 99, 0.7);
+  animation: fadeUp 0.7s ease-out 0.3s both;
 }
 </style>
