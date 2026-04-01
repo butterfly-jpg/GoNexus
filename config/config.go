@@ -33,12 +33,20 @@ type RabbitmqConfig struct {
 	RabbitmqVhost    string `toml:"vhost"`
 }
 
-// RagModelConfig Rag模型配置结构体
-type RagModelConfig struct {
-	RagEmbeddingModel string `toml:"embeddingModel"`
-	RagChatModelName  string `toml:"chatModelName"`
-	RagBaseUrl        string `toml:"baseUrl"`
-	RagDimension      int    `toml:"dimension"`
+// QwenModelConfig qwen模型配置结构体
+type QwenModelConfig struct {
+	QwenApiKey         string `toml:"qwenApiKey"`
+	QwenModelName      string `toml:"qwenModelName"`
+	QwenBaseUrl        string `toml:"qwenBaseUrl"`
+	QwenEmbeddingModel string `toml:"qwenEmbeddingModel"`
+	RagDimension       int    `toml:"dimension"`
+}
+
+// DeepSeekModelConfig deepseek模型配置结构体
+type DeepSeekModelConfig struct {
+	DeepSeekApiKey    string `toml:"deepseekApiKey"`
+	DeepSeekModelName string `toml:"deepseekModelName"`
+	DeepSeekBaseUrl   string `toml:"deepseekBaseUrl"`
 }
 
 // EmailConfig 邮箱的配置结构体
@@ -76,13 +84,14 @@ type MainConfig struct {
 
 // Config 配置结构体
 type Config struct {
-	MainConfig     `toml:"mainConfig"`
-	MysqlConfig    `toml:"mysqlConfig"`
-	RedisConfig    `toml:"redisConfig"`
-	RabbitmqConfig `toml:"rabbitmqConfig"`
-	EmailConfig    `toml:"emailConfig"`
-	JWTConfig      `toml:"jwtConfig"`
-	RagModelConfig `toml:"ragModelConfig"`
+	MainConfig          `toml:"mainConfig"`
+	MysqlConfig         `toml:"mysqlConfig"`
+	RedisConfig         `toml:"redisConfig"`
+	RabbitmqConfig      `toml:"rabbitmqConfig"`
+	EmailConfig         `toml:"emailConfig"`
+	JWTConfig           `toml:"jwtConfig"`
+	DeepSeekModelConfig `toml:"deepseekModelConfig"`
+	QwenModelConfig     `toml:"qwenModelConfig"`
 }
 
 var config *Config

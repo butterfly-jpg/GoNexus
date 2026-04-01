@@ -137,9 +137,25 @@ func GetUserSessionByUsername(username string) ([]model.SessionInfo, error) {
 	sessionIDs := globalManager.GetUserSessions(username)
 	sessionInfos := make([]model.SessionInfo, 0, len(sessionIDs))
 	for _, sessionID := range sessionIDs {
+		title := sessionID // 默认用会话ID兜底
+		helper, ok := globalManager.GetAIHelper(username, sessionID)
+		if ok {
+			// 找第一条用户消息作为标题
+			for _, msg := range helper.GetMessages() {
+				if msg.IsUser {
+					title = msg.Content
+					// 标题超过50字符则截断
+					runes := []rune(title)
+					if len(runes) > 50 {
+						title = string(runes[:50]) + "..."
+					}
+					break
+				}
+			}
+		}
 		sessionInfos = append(sessionInfos, model.SessionInfo{
 			SessionID: sessionID,
-			Title:     sessionID, // 后续优化，可以显示用户第一次提问的内容 todo
+			Title:     title,
 		})
 	}
 	return sessionInfos, nil

@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"os"
 	"strings"
 
 	"github.com/cloudwego/eino-ext/components/model/deepseek"
@@ -38,16 +37,14 @@ type DeepSeekModel struct {
 
 // NewDeepSeekModel 获取DeepSeek模型实例
 func NewDeepSeekModel(ctx context.Context) (*DeepSeekModel, error) {
-	apiKey := os.Getenv("DEEPSEEK_API_KEY")
-	modelName := os.Getenv("DEEPSEEK_MODEL_NAME")
-	baseURL := os.Getenv("DEEPSEEK_BASE_URL")
+	apiKey := config.GetConfig().DeepSeekApiKey
 	if apiKey == "" {
-		return nil, errors.New("DEEPSEEK_API_KEY environment variable is not set")
+		return nil, errors.New("deepseekApiKey config is not set")
 	}
 	llm, err := deepseek.NewChatModel(ctx, &deepseek.ChatModelConfig{
 		APIKey:  apiKey,
-		BaseURL: baseURL,
-		Model:   modelName,
+		BaseURL: config.GetConfig().DeepSeekBaseUrl,
+		Model:   config.GetConfig().DeepSeekModelName,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("create deepseek model failed. err: %v", err)
@@ -105,16 +102,14 @@ type QwenModel struct {
 
 // NewQwenModel 获取Qwen模型实例
 func NewQwenModel(ctx context.Context) (*QwenModel, error) {
-	apiKey := os.Getenv("QWEN_API_KEY")
-	modelName := os.Getenv("QWEN_MODEL_NAME")
-	baseURL := os.Getenv("QWEN_BASE_URL")
+	apiKey := config.GetConfig().QwenApiKey
 	if apiKey == "" {
-		return nil, errors.New("QWEN_API_KEY environment variable is not set")
+		return nil, errors.New("qwenApiKey config is not set")
 	}
 	llm, err := qwen.NewChatModel(ctx, &qwen.ChatModelConfig{
 		APIKey:  apiKey,
-		BaseURL: baseURL,
-		Model:   modelName,
+		BaseURL: config.GetConfig().QwenBaseUrl,
+		Model:   config.GetConfig().QwenModelName,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("create qwen model failed. err: %v", err)
@@ -173,10 +168,14 @@ type QwenRAGModel struct {
 
 // NewQwenRAGModel 获取Qwen-Rag模型实例
 func NewQwenRAGModel(ctx context.Context, username string) (*QwenRAGModel, error) {
+	apiKey := config.GetConfig().QwenApiKey
+	if apiKey == "" {
+		return nil, errors.New("qwenApiKey config is not set")
+	}
 	llm, err := qwen.NewChatModel(ctx, &qwen.ChatModelConfig{
-		APIKey:  os.Getenv("QWEN_RAG_API_KEY"),
-		BaseURL: config.GetConfig().RagBaseUrl,
-		Model:   config.GetConfig().RagChatModelName,
+		APIKey:  apiKey,
+		BaseURL: config.GetConfig().QwenBaseUrl,
+		Model:   config.GetConfig().QwenModelName,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("create qwen rag model failed. err: %v", err)
@@ -258,7 +257,6 @@ func (q *QwenRAGModel) StreamResponse(ctx context.Context, messages []*schema.Me
 		Role:    schema.User,
 		Content: ragPrompt,
 	}
-	log.Printf("用户的问题是: %s", ragPrompt)
 	// 5. 调用LLM流式生成回答
 	stream, err := q.llm.Stream(ctx, ragMessages)
 	if err != nil {

@@ -76,7 +76,7 @@ func UploadRagFile(username string, file *multipart.FileHeader) (string, error) 
 // CreatRagIndexForFile 对文件创建Rag索引
 func CreatRagIndexForFile(filename, filepath string) (string, error) {
 	// 1. 创建RAG索引器并对文件进行向量化
-	indexer, err := rag.NewRAGIndexer(filename, config.GetConfig().RagModelConfig.RagEmbeddingModel)
+	indexer, err := rag.NewRAGIndexer(filename, config.GetConfig().QwenModelConfig.QwenEmbeddingModel)
 	if err != nil {
 		log.Printf("Create rag indexer failed. err: %v", err)
 		// 删除已上传的文件

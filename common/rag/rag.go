@@ -4,6 +4,7 @@ package rag
 import (
 	"GoNexus/config"
 	"context"
+	"errors"
 	"fmt"
 	"os"
 
@@ -43,11 +44,15 @@ func DeleteIndex(ctx context.Context, filename string) error {
 // NewRAGIndexer 获取RAG的向量生成器Embedding和索引器Indexer的实例
 func NewRAGIndexer(filename, embeddingModel string) (*RAGIndexer, error) {
 	ctx := context.Background()
+	apiKey := config.GetConfig().QwenApiKey
+	if apiKey == "" {
+		return nil, errors.New("qwenApiKey config is not set")
+	}
 	// 1. 创建Embedding组件,将文本文档转换为向量表示,使用ARK平台的模型生成向量
 	// 1.1 设置向量生成器的配置
 	embedConfig := &embeddingark.EmbeddingConfig{
-		BaseURL: config.GetConfig().RagBaseUrl,
-		APIKey:  os.Getenv("QWEN_RAG_API_KEY"),
+		BaseURL: config.GetConfig().QwenBaseUrl,
+		APIKey:  apiKey,
 		Model:   embeddingModel,
 	}
 	// 1.2 创建向量生成器实例
@@ -56,7 +61,7 @@ func NewRAGIndexer(filename, embeddingModel string) (*RAGIndexer, error) {
 		return nil, fmt.Errorf("create embedder failed. err: %v", err)
 	}
 	// 2. 初始化 Redis 的向量索引结构,使用 Redisearch 模块
-	if err = redispkg.InitRedisIndex(ctx, filename, config.GetConfig().RagDimension); err != nil {
+	if err = redispkg.InitRedisIndex(ctx, filename, config.GetConfig().QwenModelConfig.RagDimension); err != nil {
 		return nil, fmt.Errorf("init redisearch index failed. err: %v", err)
 	}
 	// 3. 创建Indexer组件,将文档及其向量表示存储到后端存储系统中,构建向量数据库以提供高效的检索能力
@@ -131,10 +136,14 @@ func (r *RAGIndexer) IndexFile(ctx context.Context, filePath string) error {
 // NewRAGQuery 创建RAG查询器,用于向量检索和问答
 func NewRAGQuery(ctx context.Context, username string) (*RAGQuery, error) {
 	// 1. 创建embedding组件
+	apiKey := config.GetConfig().QwenApiKey
+	if apiKey == "" {
+		return nil, errors.New("qwenApiKey config is not set")
+	}
 	embedConfig := &embeddingark.EmbeddingConfig{
-		BaseURL: config.GetConfig().RagBaseUrl,
-		APIKey:  os.Getenv("QWEN_RAG_API_KEY"),
-		Model:   config.GetConfig().RagEmbeddingModel,
+		BaseURL: config.GetConfig().QwenBaseUrl,
+		APIKey:  apiKey,
+		Model:   config.GetConfig().QwenEmbeddingModel, // 阿里的向量模型
 	}
 	embedder, err := embeddingark.NewEmbedder(ctx, embedConfig)
 	if err != nil {
