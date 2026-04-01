@@ -27,7 +27,7 @@
         <select id="modelType" v-model="selectedModel" class="model-select">
           <option value="1">DeepSeek</option>
           <option value="2">Qwen</option>
-<!--          <option value="3">阿里百炼 MCP</option>-->
+          <option value="3">Qwen RAG</option>
         </select>
         <label for="streamingMode" style="margin-left: 20px;">
           <input type="checkbox" id="streamingMode" v-model="isStreaming" />

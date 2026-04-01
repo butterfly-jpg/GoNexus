@@ -174,7 +174,7 @@ type QwenRAGModel struct {
 // NewQwenRAGModel 获取Qwen-Rag模型实例
 func NewQwenRAGModel(ctx context.Context, username string) (*QwenRAGModel, error) {
 	llm, err := qwen.NewChatModel(ctx, &qwen.ChatModelConfig{
-		APIKey:  os.Getenv("QWEN_API_KEY"),
+		APIKey:  os.Getenv("QWEN_RAG_API_KEY"),
 		BaseURL: config.GetConfig().RagBaseUrl,
 		Model:   config.GetConfig().RagChatModelName,
 	})
@@ -258,6 +258,7 @@ func (q *QwenRAGModel) StreamResponse(ctx context.Context, messages []*schema.Me
 		Role:    schema.User,
 		Content: ragPrompt,
 	}
+	log.Printf("用户的问题是: %s", ragPrompt)
 	// 5. 调用LLM流式生成回答
 	stream, err := q.llm.Stream(ctx, ragMessages)
 	if err != nil {

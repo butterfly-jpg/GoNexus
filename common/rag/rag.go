@@ -47,7 +47,7 @@ func NewRAGIndexer(filename, embeddingModel string) (*RAGIndexer, error) {
 	// 1.1 设置向量生成器的配置
 	embedConfig := &embeddingark.EmbeddingConfig{
 		BaseURL: config.GetConfig().RagBaseUrl,
-		APIKey:  os.Getenv("QWEN_API_KEY"), // 通义千问的API
+		APIKey:  os.Getenv("QWEN_RAG_API_KEY"),
 		Model:   embeddingModel,
 	}
 	// 1.2 创建向量生成器实例
@@ -133,7 +133,7 @@ func NewRAGQuery(ctx context.Context, username string) (*RAGQuery, error) {
 	// 1. 创建embedding组件
 	embedConfig := &embeddingark.EmbeddingConfig{
 		BaseURL: config.GetConfig().RagBaseUrl,
-		APIKey:  os.Getenv("QWEN_API_KEY"), // 通义千问的API
+		APIKey:  os.Getenv("QWEN_RAG_API_KEY"),
 		Model:   config.GetConfig().RagEmbeddingModel,
 	}
 	embedder, err := embeddingark.NewEmbedder(ctx, embedConfig)

@@ -8,6 +8,8 @@ import (
 	"GoNexus/router"
 	"fmt"
 	"log"
+
+	"github.com/joho/godotenv"
 )
 
 // StartServer 开启服务
@@ -19,6 +21,10 @@ func StartServer(addr string, port int) error {
 }
 
 func main() {
+	// 0. 加载 .env 环境变量
+	if err := godotenv.Load(); err != nil {
+		log.Println("warning: .env file not found, using system environment variables")
+	}
 	// 1. 获取GoNexus后端服务IP地址和端口号
 	conf := config.GetConfig()
 	host := conf.MainConfig.Host

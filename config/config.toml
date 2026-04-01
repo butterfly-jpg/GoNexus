@@ -39,3 +39,9 @@ embeddingModel= "text-embedding-v4"
 chatModelName = "qwen-plus"
 baseUrl= "https://dashscope.aliyuncs.com/compatible-mode/v1"
 dimension= 1024
+
+[deepseekConfig]
+
+
+[qwenConfig]
+

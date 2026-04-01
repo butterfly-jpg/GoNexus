@@ -81,7 +81,7 @@ func InitRedisIndex(ctx context.Context, filename string, dimension int) error {
 		return nil
 	}
 	// 2. 如果索引不存在就创建新索引
-	if !strings.Contains(err.Error(), "Unknow index name") {
+	if !strings.Contains(err.Error(), "Unknown Index name") {
 		return fmt.Errorf("check Index Failure: %w", err)
 	}
 	fmt.Println("Creating Index:", indexName)
