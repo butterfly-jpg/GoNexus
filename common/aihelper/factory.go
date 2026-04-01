@@ -43,6 +43,14 @@ func (f *AIModelFactory) registerCreators() {
 	f.creators["2"] = func(ctx context.Context, config map[string]interface{}) (AIModel, error) {
 		return NewQwenModel(ctx)
 	}
+	// 注册QwenRag模型
+	f.creators["3"] = func(ctx context.Context, config map[string]interface{}) (AIModel, error) {
+		username, ok := config["username"].(string)
+		if !ok {
+			return nil, fmt.Errorf("qwen RAG model requires username")
+		}
+		return NewQwenRAGModel(ctx, username)
+	}
 }
 
 // CreateAIHelper 创建AIHelper方法

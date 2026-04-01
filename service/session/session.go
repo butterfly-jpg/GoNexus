@@ -28,7 +28,7 @@ func CreateSessionAndSendMessage(username, userQuestion, modelType string) (stri
 	// 2. 创建 AIHelper 实例
 	globalManager := aihelper.GetGlobalManager()
 	config := map[string]interface{}{
-		"username": username,
+		"username": username, // 将用户名传递给QwenRag模型
 	}
 	helper, err := globalManager.GetOrCreateAIHelper(username, createdSession.ID, modelType, config)
 	if err != nil {

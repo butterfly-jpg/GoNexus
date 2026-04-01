@@ -1,11 +1,13 @@
 package aihelper
 
 import (
+	"GoNexus/common/rag"
 	"GoNexus/config"
 	"context"
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"strings"
 
@@ -185,14 +187,131 @@ func NewQwenRAGModel(ctx context.Context, username string) (*QwenRAGModel, error
 // GenerateResponse QwenRag同步生成回复方法实现
 func (q *QwenRAGModel) GenerateResponse(ctx context.Context, messages []*schema.Message) (*schema.Message, error) {
 	// 1. 创建RAG查询器
-	// 测试压缩提交
+	ragQuery, err := rag.NewRAGQuery(ctx, q.username)
+	if err != nil {
+		log.Printf("create rag query failed(user may not have uploaded file). err: %v", err)
+		// 用户没有上传文件，那么正常调用Qwen对用户问题进行回答
+		res, err := q.llm.Generate(ctx, messages)
+		if err != nil {
+			return nil, fmt.Errorf("qwen rag generate failed. err: %v", err)
+		}
+		return res, nil
+	}
 	// 2. 获取用户的最后一条消息提问
-
+	if len(messages) == 0 {
+		return nil, fmt.Errorf("user message is empty")
+	}
+	lastMessage := messages[len(messages)-1]
 	// 3. 检索相关文档
-
+	docs, err := ragQuery.RetrieveDocuments(ctx, lastMessage.Content)
+	if err != nil {
+		log.Printf("retrieve documents failed. err: %v", err)
+		// 检索文档失败，还是正常调用Qwen对用户问题进行回答
+		res, err := q.llm.Generate(ctx, messages)
+		if err != nil {
+			return nil, fmt.Errorf("qwen rag generate failed. err: %v", err)
+		}
+		return res, nil
+	}
 	// 4. 将用户的提问和检索后的结果组装在一起构建新的RAG提示词
-
+	ragPrompt := rag.BuildRAGPrompt(lastMessage.Content, docs)
 	// 5. 将最后一条消息替换为新的RAG提示词
-
+	ragMessages := make([]*schema.Message, len(messages))
+	copy(ragMessages, messages)
+	ragMessages[len(ragMessages)-1] = &schema.Message{
+		Role:    schema.User,
+		Content: ragPrompt,
+	}
 	// 6. 调用LLM生成回答
+	res, err := q.llm.Generate(ctx, ragMessages)
+	if err != nil {
+		return nil, fmt.Errorf("qwen rag generate failed. err: %v", err)
+	}
+	return res, nil
+}
+
+// StreamResponse QwenRag流式生成回复方法实现
+func (q *QwenRAGModel) StreamResponse(ctx context.Context, messages []*schema.Message, cb StreamCallback) (string, error) {
+	// 1. 创建RAG查询器
+	ragQuery, err := rag.NewRAGQuery(ctx, q.username)
+	if err != nil {
+		log.Printf("create rag query failed(user may not have uploaded file). err: %v", err)
+		// 用户没有上传文件，那么正常调用Qwen对用户问题进行流式回答
+		return q.StreamWithoutRAG(ctx, messages, cb)
+	}
+	// 2. 获取用户的最后一条消息提问
+	if len(messages) == 0 {
+		return "", fmt.Errorf("user message is empty")
+	}
+	lastMessage := messages[len(messages)-1]
+	// 3. 检索相关文档
+	docs, err := ragQuery.RetrieveDocuments(ctx, lastMessage.Content)
+	if err != nil {
+		log.Printf("retrieve documents failed. err: %v", err)
+		return q.StreamWithoutRAG(ctx, messages, cb)
+	}
+	// 4. 用户提问和检索得到的结果组装替换最后一条消息
+	ragPrompt := rag.BuildRAGPrompt(lastMessage.Content, docs)
+	ragMessages := make([]*schema.Message, len(messages))
+	copy(ragMessages, messages)
+	ragMessages[len(ragMessages)-1] = &schema.Message{
+		Role:    schema.User,
+		Content: ragPrompt,
+	}
+	// 5. 调用LLM流式生成回答
+	stream, err := q.llm.Stream(ctx, ragMessages)
+	if err != nil {
+		return "", fmt.Errorf("qwen rag stream failed. err: %v", err)
+	}
+	defer stream.Close()
+	var fullRes strings.Builder
+	for {
+		// 从消息流中一帧一帧读取数据
+		msg, err := stream.Recv()
+		if errors.Is(err, io.EOF) {
+			break
+		}
+		if err != nil {
+			return "", fmt.Errorf("qwen stream receive failed. err: %v", err)
+		}
+		if len(msg.Content) > 0 {
+			// 聚合AI回复的内容
+			fullRes.WriteString(msg.Content)
+			// 实时调用回调函数,将AI内容一帧一帧主动发送给前端
+			cb(msg.Content)
+		}
+	}
+	return fullRes.String(), nil
+}
+
+// StreamWithoutRAG 没有RAG文档时的原始流式输出
+func (q *QwenRAGModel) StreamWithoutRAG(ctx context.Context, messages []*schema.Message, cb StreamCallback) (string, error) {
+	stream, err := q.llm.Stream(ctx, messages)
+	if err != nil {
+		return "", fmt.Errorf("qwen stream failed. err: %v", err)
+	}
+	defer stream.Close()
+	var fullRes strings.Builder
+	for {
+		// 从消息流中一帧一帧读取数据
+		msg, err := stream.Recv()
+		if errors.Is(err, io.EOF) {
+			break
+		}
+		if err != nil {
+			return "", fmt.Errorf("qwen stream receive failed. err: %v", err)
+		}
+		if len(msg.Content) > 0 {
+			// 聚合AI回复的内容
+			fullRes.WriteString(msg.Content)
+			// 实时调用回调函数,将AI内容一帧一帧主动发送给前端
+			cb(msg.Content)
+		}
+	}
+	return fullRes.String(), nil
+}
+
+// GetModelType 获取模型类型,QwenRag是3号模型
+func (q *QwenRAGModel) GetModelType() string {
+	return "3"
 }
