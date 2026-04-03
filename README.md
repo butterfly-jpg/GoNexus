@@ -113,7 +113,14 @@
     - [✅] 实现RAG模式下的同步对话方法 GenerateResponse
     - [✅] 实现RAG模式下的流式对话方法 StreamResponse
 
-## 🖼️ 模块五：图像识别系统 (Vision Service)
+## 🔧 模块五：模型上下文协议（MCP）
+- [✅] **MCP服务端**
+    - [✅] 实现获取MCP服务实例方法 NewMCPServer 
+- [ ] **MCP客户端**
+    - [ ] 创建MCP客户端实例 NewMCPModel
+    - [ ] 实现基于MCP的生成相应方法 GenerateResponse
+
+## 🖼️ 模块六：图像识别系统 (Vision Service)
 - [ ] **模型资源准备**
     - [ ] 下载 MobileNetV2 ONNX 模型文件
     - [ ] 准备 ImageNet 标签映射文件 (1000类)
