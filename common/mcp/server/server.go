@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -141,4 +142,12 @@ func NewMCPServer() *server.MCPServer {
 		},
 	)
 	return mcpServer
+}
+
+// StartServer 启动MCP服务,监听地址为httpAddr
+func StartServer(httpAddr string) error {
+	mcpServer := NewMCPServer()
+	httpServer := server.NewStreamableHTTPServer(mcpServer)
+	log.Printf("HTTP MCP server listening on %s/mcp", httpAddr)
+	return httpServer.Start(httpAddr)
 }
