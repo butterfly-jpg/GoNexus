@@ -52,6 +52,7 @@
             <option value="1">DeepSeek</option>
             <option value="2">Qwen</option>
             <option value="3">Qwen RAG</option>
+            <option value="4">Qwen MCP</option>
           </select>
         </div>
 

@@ -2,6 +2,7 @@ package aihelper
 
 import (
 	"context"
+	"sort"
 	"sync"
 )
 
@@ -58,7 +59,7 @@ func (m *AIHelperManager) GetOrCreateAIHelper(username, sessionID, modelType str
 	return helper, nil
 }
 
-// GetUserSessions 获取指定用户的所有会话ID
+// GetUserSessions 获取指定用户的所有会话ID，按创建时间升序排列
 func (m *AIHelperManager) GetUserSessions(username string) []string {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
@@ -66,10 +67,20 @@ func (m *AIHelperManager) GetUserSessions(username string) []string {
 	if !ok {
 		return []string{}
 	}
-	sessionIDs := make([]string, len(userHelpers))
-	// key就是会话ID
-	for sessionID := range userHelpers {
-		sessionIDs = append(sessionIDs, sessionID)
+	type entry struct {
+		id     string
+		helper *AIHelper
+	}
+	entries := make([]entry, 0, len(userHelpers))
+	for sessionID, helper := range userHelpers {
+		entries = append(entries, entry{id: sessionID, helper: helper})
+	}
+	sort.Slice(entries, func(i, j int) bool {
+		return entries[i].helper.createdAt.After(entries[j].helper.createdAt)
+	})
+	sessionIDs := make([]string, 0, len(entries))
+	for _, e := range entries {
+		sessionIDs = append(sessionIDs, e.id)
 	}
 	return sessionIDs
 }

@@ -7,6 +7,7 @@ import (
 	"context"
 	"log"
 	"sync"
+	"time"
 )
 
 // AIHelper AI助手结构体
@@ -15,6 +16,7 @@ type AIHelper struct {
 	messages  []*model.Message                             // 历史消息列表,存储用户与AI之间的对话记录
 	mu        sync.RWMutex                                 // 读写锁,保护历史消息并发访问
 	sessionID string                                       // 会话唯一标识,用于绑定消息和上下文
+	createdAt time.Time                                    // 会话创建时间,用于排序
 	saveFunc  func(*model.Message) (*model.Message, error) // 消息存储回调函数,异步发布到RabbitMQ
 }
 
@@ -25,6 +27,7 @@ func NewAIHelper(aiModel AIModel, sessionID string) *AIHelper {
 		messages:  make([]*model.Message, 0),
 		mu:        sync.RWMutex{},
 		sessionID: sessionID,
+		createdAt: time.Now(),
 		// 异步推送到消息队列中
 		saveFunc: func(msg *model.Message) (*model.Message, error) {
 			data := rabbitmq.GenerateMessageMQParam(msg.SessionID, msg.Username, msg.Content, msg.IsUser)

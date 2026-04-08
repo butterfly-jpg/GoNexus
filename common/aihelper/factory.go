@@ -51,6 +51,14 @@ func (f *AIModelFactory) registerCreators() {
 		}
 		return NewQwenRAGModel(ctx, username)
 	}
+	// 注册QwenMCP模型
+	f.creators["4"] = func(ctx context.Context, config map[string]interface{}) (AIModel, error) {
+		username, ok := config["username"].(string)
+		if !ok {
+			return nil, fmt.Errorf("qwen MCP model requires username")
+		}
+		return NewQwenMCPModel(ctx, username)
+	}
 }
 
 // CreateAIHelper 创建AIHelper方法
