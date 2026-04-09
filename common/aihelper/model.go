@@ -321,7 +321,7 @@ func NewQwenMCPModel(ctx context.Context, username string) (*QwenMCPModel, error
 	if err != nil {
 		return nil, fmt.Errorf("create qwen rag model failed. err: %v", err)
 	}
-	mcpBaseURL := "http://localhost:8081/mcp"
+	mcpBaseURL := "http://localhost:8082/mcp"
 	return &QwenMCPModel{
 		llm:        llm,
 		username:   username,

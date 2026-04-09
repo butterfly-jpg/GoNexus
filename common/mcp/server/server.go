@@ -147,7 +147,7 @@ func NewMCPServer() *server.MCPServer {
 // StartServer 启动MCP服务,监听地址为httpAddr
 func StartServer(httpAddr string) error {
 	mcpServer := NewMCPServer()
-	httpServer := server.NewStreamableHTTPServer(mcpServer)
+	httpServer := server.NewStreamableHTTPServer(mcpServer, server.WithStateLess(true))
 	log.Printf("HTTP MCP server listening on %s/mcp", httpAddr)
 	return httpServer.Start(httpAddr)
 }

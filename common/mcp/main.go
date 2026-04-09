@@ -14,7 +14,7 @@ import (
 func main() {
 	// 1. 定义命令行参数标志
 	mode := flag.String("mode", "", "运行模式: server 或 client")
-	httpAddr := flag.String("http-addr", ":8081", "HTTP服务器地址")
+	httpAddr := flag.String("http-addr", ":8082", "HTTP服务器地址")
 	city := flag.String("city", "", "要查询天气的城市名称")
 	flag.Parse()
 	// 2. 校验参数
@@ -41,7 +41,7 @@ func main() {
 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		defer cancel()
 		// b.创建客户端
-		httpURL := "http://localhost:8081/mcp"
+		httpURL := "http://localhost:8082/mcp"
 		mcpClient, err := mcpclient.NewMCPClient(httpURL)
 		if err != nil {
 			log.Fatalf("create MCP client failed: %v", err)
