@@ -6,8 +6,12 @@
     <div class="bg-orb orb3"></div>
 
     <!-- 左侧会话列表 -->
-    <div class="session-list">
-      <div class="session-list-header">
+    <div
+      class="session-list"
+      :class="{ collapsed: sidebarCollapsed }"
+      :style="sidebarCollapsed ? {} : { width: sidebarWidth + 'px', minWidth: sidebarWidth + 'px' }"
+    >
+      <div class="session-list-header" v-show="!sidebarCollapsed">
         <div class="brand">
           <span class="brand-icon">✦</span>
           <span class="brand-name">GoNexus</span>
@@ -17,7 +21,7 @@
           新对话
         </button>
       </div>
-      <div class="session-list-scroll">
+      <div class="session-list-scroll" v-show="!sidebarCollapsed">
         <ul class="session-list-ul">
           <li
             v-for="session in sessions"
@@ -34,6 +38,34 @@
           <p>点击"新对话"开始</p>
         </div>
       </div>
+
+      <!-- 收缩态图标按钮 -->
+      <div v-if="sidebarCollapsed" class="sidebar-collapsed-icons">
+        <button class="sidebar-icon-btn" @click="createNewSession" title="新对话">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+      </div>
+
+      <!-- 拖拽调整宽度的把手 -->
+      <div
+        class="sidebar-resize-handle"
+        @mousedown="startResize"
+      ></div>
+
+      <!-- 收缩/展开切换按钮 -->
+      <button
+        class="sidebar-toggle-btn"
+        @click="toggleSidebar"
+        :title="sidebarCollapsed ? '展开侧边栏' : '收起侧边栏'"
+      >
+        <svg
+          width="12" height="12" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2.5"
+          :style="{ transform: sidebarCollapsed ? 'rotate(180deg)' : 'none', transition: 'transform 0.3s' }"
+        >
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+      </button>
     </div>
 
     <!-- 右侧聊天区域 -->
@@ -129,9 +161,12 @@
       <div class="chat-input-area">
         <div class="input-wrapper">
           <textarea
-            v-model="inputMessage"
+            :value="inputMessage"
             placeholder="输入消息...  Enter 发送 / Shift+Enter 换行"
-            @keydown.enter.exact.prevent="sendMessage"
+            @compositionstart="isComposing = true"
+            @compositionend="e => { isComposing = false; inputMessage = e.target.value }"
+            @input="e => { if (!isComposing) inputMessage = e.target.value }"
+            @keydown.enter.exact.prevent="() => { if (!isComposing) sendMessage() }"
             :disabled="loading"
             ref="messageInput"
             rows="1"
@@ -173,6 +208,45 @@ export default {
     const isStreaming = ref(true)
     const uploading = ref(false)
     const fileInput = ref(null)
+    const isComposing = ref(false)
+
+    // 侧边栏收缩/拖拽相关
+    const sidebarCollapsed = ref(false)
+    const sidebarWidth = ref(260)
+    let isResizing = false
+    let resizeStartX = 0
+    let resizeStartWidth = 0
+
+    const toggleSidebar = () => {
+      sidebarCollapsed.value = !sidebarCollapsed.value
+    }
+
+    const startResize = (e) => {
+      if (sidebarCollapsed.value) return
+      isResizing = true
+      resizeStartX = e.clientX
+      resizeStartWidth = sidebarWidth.value
+      document.body.style.cursor = 'col-resize'
+      document.body.style.userSelect = 'none'
+
+      const onMouseMove = (e) => {
+        if (!isResizing) return
+        const delta = e.clientX - resizeStartX
+        const newWidth = Math.min(400, Math.max(180, resizeStartWidth + delta))
+        sidebarWidth.value = newWidth
+      }
+
+      const onMouseUp = () => {
+        isResizing = false
+        document.body.style.cursor = ''
+        document.body.style.userSelect = ''
+        document.removeEventListener('mousemove', onMouseMove)
+        document.removeEventListener('mouseup', onMouseUp)
+      }
+
+      document.addEventListener('mousemove', onMouseMove)
+      document.addEventListener('mouseup', onMouseUp)
+    }
 
     const renderMarkdown = (text) => {
       if (!text && text !== '') return ''
@@ -538,6 +612,11 @@ export default {
       isStreaming,
       uploading,
       fileInput,
+      isComposing,
+      sidebarCollapsed,
+      sidebarWidth,
+      toggleSidebar,
+      startResize,
       renderMarkdown,
       playTTS,
       createNewSession,
@@ -616,6 +695,89 @@ export default {
   border-right: 1px solid rgba(124, 58, 237, 0.2);
   position: relative;
   z-index: 10;
+  transition: width 0.3s ease, min-width 0.3s ease;
+  flex-shrink: 0;
+}
+
+.session-list.collapsed {
+  width: 52px !important;
+  min-width: 52px !important;
+}
+
+/* 拖拽把手 */
+.sidebar-resize-handle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 5px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 20;
+  background: transparent;
+  transition: background 0.2s;
+}
+.sidebar-resize-handle:hover {
+  background: rgba(124, 58, 237, 0.35);
+}
+.session-list.collapsed .sidebar-resize-handle {
+  cursor: default;
+  pointer-events: none;
+}
+
+/* 收缩/展开切换按钮 */
+.sidebar-toggle-btn {
+  position: absolute;
+  bottom: 20px;
+  right: -14px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid rgba(124, 58, 237, 0.4);
+  background: rgba(13, 13, 26, 0.95);
+  color: #a78bfa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 30;
+  box-shadow: 0 2px 10px rgba(124, 58, 237, 0.25);
+  transition: all 0.2s ease;
+}
+.sidebar-toggle-btn:hover {
+  background: rgba(124, 58, 237, 0.3);
+  border-color: rgba(167, 139, 250, 0.6);
+  color: #c4b5fd;
+  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.4);
+  transform: scale(1.1);
+}
+
+/* 收缩态图标列 */
+.sidebar-collapsed-icons {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 20px;
+  gap: 12px;
+}
+
+.sidebar-icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid rgba(124, 58, 237, 0.3);
+  background: rgba(124, 58, 237, 0.15);
+  color: #a78bfa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.sidebar-icon-btn:hover {
+  background: rgba(124, 58, 237, 0.35);
+  color: #c4b5fd;
+  box-shadow: 0 0 12px rgba(124, 58, 237, 0.3);
 }
 
 .session-list-header {
