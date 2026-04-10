@@ -1,0 +1,30 @@
+# ===== 构建阶段 =====
+FROM golang:1.22-alpine AS builder
+
+WORKDIR /app
+
+RUN apk add --no-cache git
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+
+# 编译 gonexus-mcp 服务，入口为 common/mcp/main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -o gonexus-mcp ./common/mcp
+
+# ===== 运行阶段 =====
+FROM alpine:3.19
+
+WORKDIR /app
+
+RUN apk add --no-cache tzdata ca-certificates && \
+    cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
+    echo "Asia/Shanghai" > /etc/timezone
+
+COPY --from=builder /app/gonexus-mcp .
+
+EXPOSE 8082
+
+# 默认以 server 模式启动，监听 8082
+CMD ["./gonexus-mcp", "--mode=server", "--http-addr=:8082"]

@@ -2,6 +2,7 @@ package router
 
 import (
 	"GoNexus/controller/session"
+	"GoNexus/controller/tts"
 
 	"github.com/gin-gonic/gin"
 )
@@ -12,7 +13,7 @@ func RegisterAIRouter(r *gin.RouterGroup) {
 	r.GET("/chat/sessions", session.GetUserSessionByUsername)
 	// 展示会话历史消息内容
 	r.POST("/chat/history", session.ChatHistory)
-	
+
 	// 同步聊天接口
 	r.POST("/chat/send-new-session", session.CreateSessionAndSendMessage)
 	r.POST("/chat/send", session.ChatSend)
@@ -20,4 +21,8 @@ func RegisterAIRouter(r *gin.RouterGroup) {
 	// 流式聊天接口
 	r.POST("/chat/send-stream-new-session", session.CrateStreamSessionAndSendMessage)
 	r.POST("/chat/send-stream", session.ChatStreamSend)
+
+	// TTS服务接口
+	r.POST("/chat/tts", tts.CreateTTSTask)
+	r.GET("/chat/tts/query", tts.QueryTTSTask)
 }

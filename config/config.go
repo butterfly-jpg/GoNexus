@@ -61,6 +61,11 @@ type RedisKeyConfig struct {
 	IndexNamePrefix string
 }
 
+type VoiceServiceConfig struct {
+	VoiceServiceApiKey    string `toml:"voiceServiceApiKey"`
+	VoiceServiceSecretKey string `toml:"voiceServiceSecretKey"`
+}
+
 var DefaultRedisKeyConfig = RedisKeyConfig{
 	CaptchaPrefix:   "captcha:%s",
 	IndexName:       "rag_docs:%s:idx",
@@ -92,6 +97,7 @@ type Config struct {
 	JWTConfig           `toml:"jwtConfig"`
 	DeepSeekModelConfig `toml:"deepseekModelConfig"`
 	QwenModelConfig     `toml:"qwenModelConfig"`
+	VoiceServiceConfig  `toml:"voiceServiceConfig"`
 }
 
 var config *Config

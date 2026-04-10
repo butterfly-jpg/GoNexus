@@ -3,3 +3,4 @@
 config/config.toml
 gonexus
 gonexus-mcp
+doc/docker-compose-software-aliyun.yml
