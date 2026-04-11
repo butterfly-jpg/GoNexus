@@ -41,7 +41,7 @@
             </div>
             <div class="card-text">
               <h3>AI 聊天</h3>
-              <p>多模型智能对话，支持流式输出与 RAG 知识检索</p>
+              <p>多模型智能对话，支持 RAG 文件检索、MCP 工具与 TTS 文本转语音</p>
             </div>
             <div class="card-arrow">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -50,7 +50,7 @@
               </svg>
             </div>
           </div>
-          <div class="card-tag">DeepSeek · Qwen · RAG</div>
+          <div class="card-tag">DeepSeek · Qwen · RAG · MCP</div>
         </div>
 
         <!-- 图像识别 -->
