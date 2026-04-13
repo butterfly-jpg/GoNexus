@@ -170,7 +170,7 @@ func GetChatHistory(username, sessionID string) ([]model.History, code.Code) {
 		return nil, code.ServerBusyCode
 	}
 	messages := helper.GetMessages()
-	history := make([]model.History, len(messages))
+	history := make([]model.History, 0, len(messages))
 	for _, message := range messages {
 		history = append(history, model.History{
 			IsUser:  message.IsUser,
