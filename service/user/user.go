@@ -57,9 +57,11 @@ func SendCaptcha(email string) code.Code {
 func Login(username, password string) (string, code.Code) {
 	var userInfo *model.User
 	var ok bool
-	// 1. 检查用户名是否存在
+	// 1. 检查用户名是否存在,支持用户名和邮箱两种方式登录
 	if ok, userInfo = user.IsExistUser(username, user.UsernameCondition); !ok {
-		return "", code.UserNotExistCode
+		if ok, userInfo = user.IsExistUser(username, user.EmailCondition); !ok {
+			return "", code.UserNotExistCode
+		}
 	}
 	// 2. 验证密码
 	if userInfo.Password != utils.MD5(password) {
