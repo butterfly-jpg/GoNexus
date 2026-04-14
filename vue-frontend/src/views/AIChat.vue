@@ -197,7 +197,7 @@
 
 <script>
 import { ref, nextTick, computed, onMounted } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import api from '../utils/api'
 
 export default {
@@ -368,6 +368,22 @@ export default {
     }
 
     const deleteSession = async (sessionId) => {
+      // 二次确认弹窗
+      try {
+        await ElMessageBox.confirm(
+            '删除后，这条对话记录将无法找回，其中包含的文件也将一并被删除。',
+            '确定删除此对话？',
+            {
+              confirmButtonText: '确定删除',
+              cancelButtonText: '取消',
+              type: 'warning',
+              customClass: 'delete-session-dialog'
+            }
+        )
+      } catch {
+        // 用户点击了取消
+        return
+      }
       try {
         const response = await api.delete('/ai/chat/delete-session', { data: { sessionID: sessionId } })
         if (response.data && response.data.status_code === 1000) {
