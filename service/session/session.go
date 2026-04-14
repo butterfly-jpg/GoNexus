@@ -3,6 +3,7 @@ package session
 import (
 	"GoNexus/common/aihelper"
 	"GoNexus/common/code"
+	"GoNexus/dao/message"
 	"GoNexus/dao/session"
 	"GoNexus/model"
 	"context"
@@ -171,11 +172,28 @@ func GetChatHistory(username, sessionID string) ([]model.History, code.Code) {
 	}
 	messages := helper.GetMessages()
 	history := make([]model.History, 0, len(messages))
-	for _, message := range messages {
+	for _, msg := range messages {
 		history = append(history, model.History{
-			IsUser:  message.IsUser,
-			Content: message.Content,
+			IsUser:  msg.IsUser,
+			Content: msg.Content,
 		})
 	}
 	return history, code.SuccessCode
+}
+
+// DeleteSession 根据用户名和会话ID删除会话记录
+func DeleteSession(username, sessionID string) code.Code {
+	// 1. 从内存中移除 AIHelper
+	aihelper.GetGlobalManager().RemoveAIHelper(username, sessionID)
+	// 2. 软删除数据库中的会话记录
+	if err := session.DeleteSession(username, sessionID); err != nil {
+		log.Println("DeleteSession failed. err:", err)
+		return code.ServerBusyCode
+	}
+	// 3. 硬删除该会话下的所有消息记录
+	if err := message.DeleteMessagesBySessionID(sessionID); err != nil {
+		log.Println("DeleteMessagesBySessionID failed. err:", err)
+		return code.ServerBusyCode
+	}
+	return code.SuccessCode
 }

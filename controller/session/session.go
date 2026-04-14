@@ -49,6 +49,14 @@ type (
 		History []model.History `json:"history"`
 		controller.Response
 	}
+	// DeleteSessionRequest 删除会话请求结构
+	DeleteSessionRequest struct {
+		SessionID string `json:"sessionID" binding:"required"`
+	}
+	// DeleteSessionResponse 删除会话响应结构
+	DeleteSessionResponse struct {
+		controller.Response
+	}
 )
 
 // CreateSessionAndSendMessage 控制层创建会话和发送消息方法
@@ -103,8 +111,8 @@ func setSSEHeaders(c *gin.Context) {
 	c.Header("X-Accel-Buffering", "no")
 }
 
-// CrateStreamSessionAndSendMessage 控制层创建会话和发送SSE消息回复方法
-func CrateStreamSessionAndSendMessage(c *gin.Context) {
+// CreateStreamSessionAndSendMessage 控制层创建会话和发送SSE消息回复方法
+func CreateStreamSessionAndSendMessage(c *gin.Context) {
 	// 1. 参数处理
 	req := &CreateSessionAndSendMessageRequest{}
 	username := c.GetString("username")
@@ -185,5 +193,25 @@ func ChatHistory(c *gin.Context) {
 	}
 	res.Success()
 	res.History = history
+	c.JSON(http.StatusOK, res)
+}
+
+// DeleteSession 控制层删除会话窗口接口
+func DeleteSession(c *gin.Context) {
+	// 1. 参数处理
+	req := &DeleteSessionRequest{}
+	res := &DeleteSessionResponse{}
+	username := c.GetString("username")
+	if err := c.ShouldBindJSON(req); err != nil {
+		c.JSON(http.StatusOK, res.CodeOf(code.InvalidParamsCode))
+		return
+	}
+	// 2. 根据会话ID和用户名删除该条会话
+	resCode := session.DeleteSession(username, req.SessionID)
+	if resCode != code.SuccessCode {
+		c.JSON(http.StatusOK, res.CodeOf(resCode))
+		return
+	}
+	res.Success()
 	c.JSON(http.StatusOK, res)
 }

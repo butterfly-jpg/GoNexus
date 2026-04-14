@@ -11,6 +11,11 @@ func CreateMessage(message *model.Message) (*model.Message, error) {
 	return message, err
 }
 
+// DeleteMessagesBySessionID 根据会话ID删除该会话下的所有消息
+func DeleteMessagesBySessionID(sessionID string) error {
+	return mysql.DB.Where("session_id = ?", sessionID).Delete(&model.Message{}).Error
+}
+
 // GetAllMessages 从数据库Message表中查询所有的数据
 func GetAllMessages() ([]*model.Message, error) {
 	var messages []*model.Message

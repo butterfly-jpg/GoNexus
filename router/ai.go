@@ -19,10 +19,13 @@ func RegisterAIRouter(r *gin.RouterGroup) {
 	r.POST("/chat/send", session.ChatSend)
 
 	// 流式聊天接口
-	r.POST("/chat/send-stream-new-session", session.CrateStreamSessionAndSendMessage)
+	r.POST("/chat/send-stream-new-session", session.CreateStreamSessionAndSendMessage)
 	r.POST("/chat/send-stream", session.ChatStreamSend)
 
 	// TTS服务接口
 	r.POST("/chat/tts", tts.CreateTTSTask)
 	r.GET("/chat/tts/query", tts.QueryTTSTask)
+
+	// 删除会话接口
+	r.DELETE("/chat/delete-session", session.DeleteSession)
 }

@@ -31,6 +31,13 @@
           >
             <span class="session-dot"></span>
             <span class="session-title">{{ session.name || `会话 ${session.id}` }}</span>
+            <button
+              class="session-delete-btn"
+              @click.stop="deleteSession(session.id)"
+              title="删除会话"
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+            </button>
           </li>
         </ul>
         <div v-if="sessions.length === 0" class="sidebar-empty">
@@ -359,6 +366,29 @@ export default {
       scrollToBottom()
     }
 
+    const deleteSession = async (sessionId) => {
+      try {
+        const response = await api.delete('/ai/chat/delete-session', { data: { sessionID: sessionId } })
+        if (response.data && response.data.status_code === 1000) {
+          // 从本地会话列表中移除
+          const updated = { ...sessions.value }
+          delete updated[sessionId]
+          sessions.value = updated
+          // 如果删除的是当前会话，清空聊天区
+          if (currentSessionId.value === String(sessionId)) {
+            currentSessionId.value = null
+            currentMessages.value = []
+          }
+          ElMessage.success('会话已删除')
+        } else {
+          ElMessage.error('删除失败')
+        }
+      } catch (err) {
+        console.error('Delete session error:', err)
+        ElMessage.error('删除失败，请重试')
+      }
+    }
+
     const syncHistory = async () => {
       if (!currentSessionId.value || tempSession.value) {
         ElMessage.warning('请选择已有会话进行同步')
@@ -621,6 +651,7 @@ export default {
       playTTS,
       createNewSession,
       switchSession,
+      deleteSession,
       syncHistory,
       sendMessage,
       triggerFileUpload,
@@ -904,6 +935,29 @@ export default {
   text-overflow: ellipsis;
   white-space: nowrap;
   flex: 1;
+}
+
+.session-delete-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: all 0.2s;
+}
+.session-item:hover .session-delete-btn {
+  opacity: 1;
+}
+.session-delete-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
 }
 
 .sidebar-empty {

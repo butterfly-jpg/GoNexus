@@ -85,6 +85,15 @@ func (m *AIHelperManager) GetUserSessions(username string) []string {
 	return sessionIDs
 }
 
+// RemoveAIHelper 从内存中移除指定用户的指定会话
+func (m *AIHelperManager) RemoveAIHelper(username, sessionID string) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if userHelpers, ok := m.helpers[username]; ok {
+		delete(userHelpers, sessionID)
+	}
+}
+
 // GetAIHelper 获取指定用户指定会话的AIHelper
 func (m *AIHelperManager) GetAIHelper(username, sessionID string) (*AIHelper, bool) {
 	m.mu.RLock()

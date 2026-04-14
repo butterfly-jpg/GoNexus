@@ -25,3 +25,7 @@ func GetSessionsByUsername(username string) ([]model.Session, error) {
 	return sessions, err
 }
 
+// DeleteSession 根据用户名和会话ID软删除会话记录
+func DeleteSession(username, sessionID string) error {
+	return mysql.DB.Where("id = ? AND username = ?", sessionID, username).Delete(&model.Session{}).Error
+}
