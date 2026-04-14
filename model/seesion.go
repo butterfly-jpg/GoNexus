@@ -18,6 +18,7 @@ type Session struct {
 
 // SessionInfo 会话信息
 type SessionInfo struct {
-	SessionID string `json:"sessionID"`
-	Title     string `json:"title"`
+	SessionID string    `json:"sessionID"`
+	Title     string    `json:"title"`
+	CreatedAt time.Time `json:"created_at"`
 }

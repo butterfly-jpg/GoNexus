@@ -9,6 +9,7 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -139,8 +140,10 @@ func GetUserSessionByUsername(username string) ([]model.SessionInfo, error) {
 	sessionInfos := make([]model.SessionInfo, 0, len(sessionIDs))
 	for _, sessionID := range sessionIDs {
 		title := sessionID // 默认用会话ID兜底
+		var createdAt time.Time
 		helper, ok := globalManager.GetAIHelper(username, sessionID)
 		if ok {
+			createdAt = helper.CreatedAt
 			// 找第一条用户消息作为标题
 			for _, msg := range helper.GetMessages() {
 				if msg.IsUser {
@@ -157,6 +160,7 @@ func GetUserSessionByUsername(username string) ([]model.SessionInfo, error) {
 		sessionInfos = append(sessionInfos, model.SessionInfo{
 			SessionID: sessionID,
 			Title:     title,
+			CreatedAt: createdAt,
 		})
 	}
 	return sessionInfos, nil

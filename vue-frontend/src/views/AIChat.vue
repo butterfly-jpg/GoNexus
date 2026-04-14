@@ -324,7 +324,8 @@ export default {
             sessionMap[sid] = {
               id: sid,
               name: s.title || `会话 ${sid}`,
-              messages: []
+              messages: [],
+              createdAt: s.created_at || null
             }
           })
           sessions.value = sessionMap
@@ -425,6 +426,19 @@ export default {
       currentMessages.value.push(userMessage)
       await nextTick()
       scrollToBottom()
+      // 如果是临时会话，立即在侧边栏显示会话标签
+      if (tempSession.value && (String(currentSessionId.value) === 'temp' || !currentSessionId.value)) {
+        const tempId = 'temp_' + Date.now()
+        const newSessions = { ...sessions.value }
+        newSessions[tempId] = {
+          id: tempId,
+          name: currentInput.length > 15 ? currentInput.slice(0, 15) + '...' : currentInput || '新会话',
+          messages: [...currentMessages.value],
+          createdAt: new Date().toISOString()
+        }
+        sessions.value = newSessions
+        currentSessionId.value = tempId
+      }
       try {
         loading.value = true
         if (isStreaming.value) {
@@ -435,11 +449,14 @@ export default {
       } catch (err) {
         console.error('Send message error:', err)
         ElMessage.error('发送失败，请重试')
-        if (!tempSession.value && currentSessionId.value && sessions.value[currentSessionId.value] && sessions.value[currentSessionId.value].messages) {
-          const sessionArr = sessions.value[currentSessionId.value].messages
-          if (sessionArr && sessionArr.length) sessionArr.pop()
+        // 移除临时会话标签
+        if (currentSessionId.value && String(currentSessionId.value).startsWith('temp_')) {
+          const updated = { ...sessions.value }
+          delete updated[currentSessionId.value]
+          sessions.value = updated
+          currentSessionId.value = null
+          tempSession.value = true
         }
-        currentMessages.value.pop()
       } finally {
         if (!isStreaming.value) {
           loading.value = false
@@ -498,15 +515,24 @@ export default {
                   const parsed = JSON.parse(data)
                   if (parsed.sessionId) {
                     const newSid = String(parsed.sessionId)
-                    if (tempSession.value) {
-                      sessions.value[newSid] = {
-                        id: newSid,
-                        name: '新会话',
-                        messages: [...currentMessages.value]
-                      }
-                      currentSessionId.value = newSid
-                      tempSession.value = false
+                    const oldSid = currentSessionId.value
+                    // 删除旧的临时会话标签
+                    if (oldSid && String(oldSid).startsWith('temp_')) {
+                      const updated = { ...sessions.value }
+                      delete updated[oldSid]
+                      sessions.value = updated
                     }
+                    // 创建真正的会话标签
+                    const finalSessions = { ...sessions.value }
+                    finalSessions[newSid] = {
+                      id: newSid,
+                      name: sessions.value[oldSid]?.name || '新会话',
+                      messages: [...currentMessages.value],
+                      createdAt: sessions.value[oldSid]?.createdAt || new Date().toISOString()
+                    }
+                    sessions.value = finalSessions
+                    currentSessionId.value = newSid
+                    tempSession.value = false
                   }
                 } catch (e) {
                   currentMessages.value[aiMessageIndex].content += data
@@ -551,16 +577,34 @@ export default {
         if (response.data && response.data.status_code === 1000) {
           const sessionId = String(response.data.sessionID)
           const aiMessage = { role: 'assistant', content: response.data.information || '' }
+          // 删除临时会话标签
+          const oldSid = currentSessionId.value
+          if (oldSid && String(oldSid).startsWith('temp_')) {
+            const updated = { ...sessions.value }
+            delete updated[oldSid]
+            sessions.value = updated
+          }
+          // 创建真正的会话标签
           sessions.value[sessionId] = {
             id: sessionId,
             name: '新会话',
-            messages: [{ role: 'user', content: question }, aiMessage]
+            messages: [{ role: 'user', content: question }, aiMessage],
+            createdAt: sessions.value[oldSid]?.createdAt || new Date().toISOString()
           }
           currentSessionId.value = sessionId
           tempSession.value = false
           currentMessages.value = [...sessions.value[sessionId].messages]
         } else {
           ElMessage.error(response.data?.status_msg || '发送失败')
+          // 移除临时会话标签
+          const oldSid = currentSessionId.value
+          if (oldSid && String(oldSid).startsWith('temp_')) {
+            const updated = { ...sessions.value }
+            delete updated[oldSid]
+            sessions.value = updated
+            currentSessionId.value = null
+            tempSession.value = true
+          }
           currentMessages.value.pop()
         }
       } else {
@@ -629,8 +673,17 @@ export default {
       loadSessions()
     })
 
+    // 会话列表计算属性，确保响应式更新
+    const sessionList = computed(() => {
+      return [...Object.values(sessions.value)].sort((a, b) => {
+        const tA = a.createdAt ? new Date(a.createdAt).getTime() : 0
+        const tB = b.createdAt ? new Date(b.createdAt).getTime() : 0
+        return tB - tA  // 降序：最新在前
+      })
+    })
+
     return {
-      sessions: computed(() => Object.values(sessions.value)),
+      sessions: sessionList,
       currentSessionId,
       tempSession,
       currentMessages,

@@ -76,7 +76,7 @@ func (m *AIHelperManager) GetUserSessions(username string) []string {
 		entries = append(entries, entry{id: sessionID, helper: helper})
 	}
 	sort.Slice(entries, func(i, j int) bool {
-		return entries[i].helper.createdAt.After(entries[j].helper.createdAt)
+		return entries[i].helper.CreatedAt.After(entries[j].helper.CreatedAt)
 	})
 	sessionIDs := make([]string, 0, len(entries))
 	for _, e := range entries {
