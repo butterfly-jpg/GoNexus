@@ -1,5 +1,5 @@
 <template>
-  <div class="ai-chat-container">
+  <div class="ai-chat-container" :class="{ 'light-theme': !isDarkTheme }">
     <!-- 浮动光球背景 -->
     <div class="bg-orb orb1"></div>
     <div class="bg-orb orb2"></div>
@@ -86,7 +86,7 @@
         <div class="divider-v"></div>
 
         <div class="model-selector">
-          <span class="label-tag">模型</span>
+          <span class="label-tag">模型选择</span>
           <select v-model="selectedModel" class="model-select">
             <option value="1">DeepSeek</option>
             <option value="2">Qwen</option>
@@ -106,6 +106,12 @@
         </div>
 
         <div class="toolbar-right">
+          <button class="icon-btn theme-toggle-btn" @click="toggleTheme" :title="isDarkTheme ? '切换到明亮模式' : '切换到漆黑模式'">
+            <!-- 太阳图标 -->
+            <svg v-if="isDarkTheme" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            <!-- 月亮图标 -->
+            <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          </button>
           <button
             class="icon-btn"
             @click="syncHistory"
@@ -216,6 +222,14 @@ export default {
     const uploading = ref(false)
     const fileInput = ref(null)
     const isComposing = ref(false)
+
+    // 主题相关
+    const isDarkTheme = ref(true)
+
+    const toggleTheme = () => {
+      isDarkTheme.value = !isDarkTheme.value
+      localStorage.setItem('goNexus_theme', isDarkTheme.value ? 'dark' : 'light')
+    }
 
     // 侧边栏收缩/拖拽相关
     const sidebarCollapsed = ref(false)
@@ -686,6 +700,10 @@ export default {
     }
 
     onMounted(() => {
+      const saved = localStorage.getItem('goNexus_theme')
+      if (saved === 'light') {
+        isDarkTheme.value = false
+      }
       loadSessions()
     })
 
@@ -714,6 +732,8 @@ export default {
       isComposing,
       sidebarCollapsed,
       sidebarWidth,
+      isDarkTheme,
+      toggleTheme,
       toggleSidebar,
       startResize,
       renderMarkdown,
@@ -1434,5 +1454,300 @@ export default {
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
   display: inline-block;
+}
+
+/* ===== 明亮主题样式 ===== */
+.light-theme .ai-chat-container {
+  background: #f5f3ff;
+  color: #1e293b;
+}
+
+.light-theme .session-list {
+  background: #ffffff;
+  border-right-color: rgba(124, 58, 237, 0.12);
+  box-shadow: 2px 0 20px rgba(124, 58, 237, 0.08);
+}
+
+.light-theme .session-list-header {
+  border-bottom-color: rgba(124, 58, 237, 0.1);
+}
+
+.light-theme .brand-name {
+  background: linear-gradient(135deg, #7c3aed, #4f46e5);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.light-theme .new-chat-btn {
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);
+}
+
+.light-theme .session-item {
+  color: #64748b;
+}
+
+.light-theme .session-item:hover {
+  background: rgba(124, 58, 237, 0.06);
+  color: #7c3aed;
+  border-left-color: rgba(124, 58, 237, 0.3);
+}
+
+.light-theme .session-item.active {
+  background: rgba(124, 58, 237, 0.08);
+  color: #7c3aed;
+  border-left-color: #7c3aed;
+}
+
+.light-theme .session-delete-btn {
+  color: #94a3b8;
+}
+
+.light-theme .session-delete-btn:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.light-theme .sidebar-toggle-btn {
+  background: #ffffff;
+  border-color: rgba(124, 58, 237, 0.3);
+  color: #7c3aed;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.15);
+}
+
+.light-theme .sidebar-toggle-btn:hover {
+  background: rgba(124, 58, 237, 0.1);
+}
+
+.light-theme .sidebar-icon-btn {
+  background: rgba(124, 58, 237, 0.08);
+  border-color: rgba(124, 58, 237, 0.2);
+  color: #7c3aed;
+}
+
+.light-theme .sidebar-icon-btn:hover {
+  background: rgba(124, 58, 237, 0.15);
+}
+
+.light-theme .sidebar-resize-handle:hover {
+  background: rgba(124, 58, 237, 0.25);
+}
+
+.light-theme .top-bar {
+  background: rgba(255, 255, 255, 0.9);
+  border-bottom-color: rgba(124, 58, 237, 0.1);
+}
+
+.light-theme .icon-btn {
+  background: rgba(124, 58, 237, 0.06);
+  border-color: rgba(124, 58, 237, 0.15);
+  color: #64748b;
+}
+
+.light-theme .icon-btn:hover:not(:disabled) {
+  background: rgba(124, 58, 237, 0.12);
+  border-color: rgba(124, 58, 237, 0.3);
+  color: #7c3aed;
+}
+
+.light-theme .theme-toggle-btn {
+  background: rgba(124, 58, 237, 0.08);
+  border-color: rgba(124, 58, 237, 0.2);
+  color: #7c3aed;
+}
+
+.light-theme .theme-toggle-btn:hover {
+  background: rgba(124, 58, 237, 0.15);
+  color: #6d28d9;
+}
+
+.light-theme .divider-v {
+  background: rgba(124, 58, 237, 0.12);
+}
+
+.light-theme .label-tag {
+  color: #94a3b8;
+}
+
+.light-theme .model-select {
+  background: rgba(124, 58, 237, 0.06);
+  border-color: rgba(124, 58, 237, 0.2);
+  color: #7c3aed;
+}
+
+.light-theme .model-select:focus {
+  border-color: rgba(124, 58, 237, 0.5);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+}
+
+.light-theme .model-select option {
+  background: #ffffff;
+  color: #1e293b;
+}
+
+.light-theme .toggle-track {
+  background: rgba(124, 58, 237, 0.15);
+  border-color: rgba(124, 58, 237, 0.2);
+}
+
+.light-theme .toggle-switch input:checked + .toggle-track {
+  background: rgba(124, 58, 237, 0.5);
+  border-color: rgba(124, 58, 237, 0.4);
+}
+
+.light-theme .toggle-thumb {
+  background: #a78bfa;
+}
+
+.light-theme .toggle-switch input:checked + .toggle-track .toggle-thumb {
+  background: #7c3aed;
+}
+
+.light-theme .upload-icon-btn {
+  background: rgba(124, 58, 237, 0.06);
+}
+
+.light-theme .empty-state {
+  color: #64748b;
+}
+
+.light-theme .empty-title {
+  color: #7c3aed;
+}
+
+.light-theme .empty-sub {
+  color: #94a3b8;
+}
+
+.light-theme .avatar-user {
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+}
+
+.light-theme .avatar-ai {
+  background: linear-gradient(135deg, #7c3aed, #6366f1);
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);
+}
+
+.light-theme .bubble-ai {
+  background: #ffffff;
+  color: #334155;
+  border-color: rgba(124, 58, 237, 0.12);
+  box-shadow: 0 4px 20px rgba(124, 58, 237, 0.08);
+}
+
+.light-theme .bubble-actions {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 8px;
+  padding: 2px;
+}
+
+.light-theme .tts-btn {
+  background: rgba(124, 58, 237, 0.08);
+  border-color: rgba(124, 58, 237, 0.15);
+  color: #7c3aed;
+}
+
+.light-theme .tts-btn:hover {
+  background: rgba(124, 58, 237, 0.15);
+  color: #6d28d9;
+}
+
+.light-theme .bubble-content code {
+  background: rgba(124, 58, 237, 0.08);
+  color: #7c3aed;
+}
+
+.light-theme .chat-input-area {
+  background: rgba(255, 255, 255, 0.95);
+  border-top-color: rgba(124, 58, 237, 0.1);
+}
+
+.light-theme .input-wrapper {
+  background: #ffffff;
+  border-color: rgba(124, 58, 237, 0.15);
+}
+
+.light-theme .input-wrapper:focus-within {
+  border-color: rgba(124, 58, 237, 0.4);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.08), 0 4px 20px rgba(124, 58, 237, 0.06);
+  background: #ffffff;
+}
+
+.light-theme .input-wrapper textarea {
+  color: #1e293b;
+}
+
+.light-theme .input-wrapper textarea::placeholder {
+  color: #94a3b8;
+}
+
+.light-theme .send-btn {
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);
+}
+
+.light-theme .send-btn:hover:not(:disabled) {
+  box-shadow: 0 6px 16px rgba(124, 58, 237, 0.35);
+}
+
+.light-theme .send-btn:disabled {
+  background: rgba(124, 58, 237, 0.08);
+  color: #a78bfa;
+}
+
+.light-theme .chat-messages {
+  background: #ffffff;
+}
+
+.light-theme .bubble-user {
+  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.3);
+}
+
+.light-theme .chat-messages::-webkit-scrollbar-thumb {
+  background: rgba(124, 58, 237, 0.2);
+}
+
+.light-theme .chat-messages::-webkit-scrollbar-thumb:hover {
+  background: rgba(124, 58, 237, 0.35);
+}
+
+.light-theme .session-list-scroll::-webkit-scrollbar-thumb {
+  background: rgba(124, 58, 237, 0.2);
+}
+
+/* 明亮主题下光球效果减弱 */
+.light-theme .bg-orb {
+  opacity: 0.06;
+}
+
+.light-theme .orb1 {
+  background: radial-gradient(circle, #a78bfa, transparent);
+}
+
+.light-theme .orb2 {
+  background: radial-gradient(circle, #c4b5fd, transparent);
+}
+
+.light-theme .orb3 {
+  background: radial-gradient(circle, #818cf8, transparent);
+}
+
+/* 滚动条样式 */
+.light-theme ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.light-theme ::-webkit-scrollbar-track {
+  background: rgba(124, 58, 237, 0.05);
+}
+
+.light-theme ::-webkit-scrollbar-thumb {
+  background: rgba(124, 58, 237, 0.2);
+  border-radius: 4px;
+}
+
+.light-theme ::-webkit-scrollbar-thumb:hover {
+  background: rgba(124, 58, 237, 0.35);
 }
 </style>
