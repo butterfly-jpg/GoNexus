@@ -3,3 +3,5 @@ config/config.toml
 gonexus
 gonexus-mcp
 doc/docker-compose-software-aliyun.yml
+vue-frontend/dist
+vue-frontend/node_modules
