@@ -20,7 +20,9 @@ func InitRouter() *gin.Engine {
 	FileGroup := enterRouter.Group("/file")
 	FileGroup.Use(jwt.Auth())
 	RegisterFileRouter(FileGroup)
-	// 4. 注册图像识别模块 todo
-
+	// 4. 注册图像识别模块
+	ImageGroup := enterRouter.Group("/image")
+	ImageGroup.Use(jwt.Auth())
+	RegisterImageRouter(ImageGroup)
 	return r
 }

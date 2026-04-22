@@ -2,6 +2,7 @@ package image
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"image"
 	_ "image/gif"
@@ -114,6 +115,15 @@ func loadLabels(labelPath string) ([]string, error) {
 		return nil, fmt.Errorf("no labels found in %s", labelPath)
 	}
 	return labels, nil
+}
+
+// PredictFromBuffer 核心逻辑,从图片缓冲中预测对应的所属标签
+func (r *ImageRecognizer) PredictFromBuffer(imageBuffer []byte) (string, error) {
+	img, _, err := image.Decode(bytes.NewReader(imageBuffer))
+	if err != nil {
+		return "", fmt.Errorf("decode image buffer error: %v", err)
+	}
+	return r.PredictFromImage(img)
 }
 
 // PredictFromFile 核心逻辑，从图片文件中预测对应的所属标签
